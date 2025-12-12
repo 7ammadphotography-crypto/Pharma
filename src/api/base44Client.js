@@ -72,19 +72,25 @@ const createSupabaseEntity = (entityName) => {
       }
       return data;
     },
-    // Create new item
-    create: async (data) => {
-      // Auto-inject user_id if needed and available
-      const { data: { session } } = await supabase.auth.getSession();
-      const payload = { ...data };
+    // Create new item (single)
+    create: async (data, { select = true } = {}) => {
+      // Auto-inject user_id if needed and available would happen here via RLS or trigger mostly
+      let query = supabase.from(tableName).insert(data);
+      if (select) query = query.select().single();
 
-      // Specific handling: quiz_attempts, bookmarks etc often need user_id
-      // But usually the app passes it in 'data' or we rely on RLS + default? 
-      // For now, trust the payload from app, but if missing and table has user_id, might need to inject.
-
-      const { data: created, error } = await supabase.from(tableName).insert(payload).select().single();
+      const { data: created, error } = await query;
       if (error) {
         console.error(`[SupabaseAdapter] Create error for ${tableName}:`, error);
+        throw error;
+      }
+      return created;
+    },
+    // Bulk Create
+    bulkCreate: async (data) => {
+      if (!Array.isArray(data) || data.length === 0) return [];
+      const { data: created, error } = await supabase.from(tableName).insert(data).select();
+      if (error) {
+        console.error(`[SupabaseAdapter] Bulk Create error for ${tableName}:`, error);
         throw error;
       }
       return created;

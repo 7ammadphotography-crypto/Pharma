@@ -59,13 +59,11 @@ export default function AIQuiz() {
   });
 
   useEffect(() => {
-    // Start generating questions when either:
-    // 1. We have competency or topic data
-    // 2. We don't have topicId or competencyId (demo mode)
-    if (competency || topic || (!topicId && !competencyId)) {
+    // Start generating questions when we have competency or topic data
+    if (competency || topic) {
       generateQuestions();
     }
-  }, [competency, topic, topicId, competencyId]);
+  }, [competency, topic]);
 
   useEffect(() => {
     if (voiceEnabled && currentQuestion && !showResult) {

@@ -116,6 +116,7 @@ export const AuthProvider = ({ children }) => {
     const value = {
         user: profile ? { ...user, ...profile } : user, // Merge auth user with profile data
         fullProfile: profile,
+        isAdmin: profile?.role === 'admin',
         loading,
         signUp,
         signIn,

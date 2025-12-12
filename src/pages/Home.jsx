@@ -17,7 +17,7 @@ import QuickActions from '@/components/home/QuickActions';
 import { useAuth } from '@/hooks/useAuth';
 
 export default function Home() {
-  const { user, loading } = useAuth();
+  const { user, loading, isAdmin } = useAuth();
 
   const { data: attempts = [] } = useQuery({
     queryKey: ['attempts', user?.id],
@@ -196,12 +196,14 @@ export default function Home() {
       </div>
 
       {/* Admin Link - Subtle */}
-      <div className="flex justify-center pt-4">
-        <Link to={createPageUrl('AdminPanel')} className="flex items-center gap-2 text-xs text-slate-600 hover:text-slate-400 transition-colors bg-white/5 px-4 py-2 rounded-full">
-          <Settings className="w-3 h-3" />
-          <span>Admin Access</span>
-        </Link>
-      </div>
+      {isAdmin && (
+        <div className="flex justify-center pt-4">
+          <Link to={createPageUrl('AdminPanel')} className="flex items-center gap-2 text-xs text-slate-600 hover:text-slate-400 transition-colors bg-white/5 px-4 py-2 rounded-full">
+            <Settings className="w-3 h-3" />
+            <span>Admin Access</span>
+          </Link>
+        </div>
+      )}
     </div>
   );
 }

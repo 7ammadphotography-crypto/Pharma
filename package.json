@@ -6,8 +6,9 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "lint": "eslint .",
+    "lint": "eslint . --ext js,jsx --report-unused-disable-directives",
     "preview": "vite preview",
+    "seed": "node scripts/seed.js",
     "test": "vitest"
   },
   "dependencies": {
@@ -46,6 +47,7 @@
     "clsx": "^2.1.1",
     "cmdk": "^1.0.0",
     "date-fns": "^3.6.0",
+    "dotenv": "^17.2.3",
     "embla-carousel-react": "^8.5.2",
     "framer-motion": "^12.4.7",
     "input-otp": "^1.4.2",

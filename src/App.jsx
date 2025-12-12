@@ -3,6 +3,7 @@ import Pages from "@/pages/index.jsx"
 import { Toaster } from "@/components/ui/toaster"
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { AuthProvider } from "@/hooks/useAuth"
+import GlobalErrorBoundary from "@/components/GlobalErrorBoundary"
 
 // Create a client
 const queryClient = new QueryClient({
@@ -18,8 +19,10 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <Pages />
-        <Toaster />
+        <GlobalErrorBoundary>
+          <Pages />
+          <Toaster />
+        </GlobalErrorBoundary>
       </AuthProvider>
     </QueryClientProvider>
   )

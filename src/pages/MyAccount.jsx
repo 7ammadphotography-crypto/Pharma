@@ -38,38 +38,16 @@ export default function MyAccount() {
   const isDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
 
   useEffect(() => {
-    if (isDev) {
-      // Mock user for development
-      const mockUser = {
-        email: 'demo@pharmatarget.com',
-        full_name: 'Demo Student',
-        university: 'Pharmacy University',
-        workplace: 'Local Pharmacy',
-        birth_date: '1995-01-01',
-        bio: 'Aspiring Pharmacist passionate about clinical research.',
-        location: 'Cairo, Egypt',
-        subscription_status: 'active'
-      };
-      setUser(mockUser);
+    base44.auth.me().then(u => {
+      setUser(u);
       setEditData({
-        university: mockUser.university,
-        workplace: mockUser.workplace,
-        birth_date: mockUser.birth_date,
-        bio: mockUser.bio,
-        location: mockUser.location
+        university: u.university || '',
+        workplace: u.workplace || '',
+        birth_date: u.birth_date || '',
+        bio: u.bio || '',
+        location: u.location || ''
       });
-    } else {
-      base44.auth.me().then(u => {
-        setUser(u);
-        setEditData({
-          university: u.university || '',
-          workplace: u.workplace || '',
-          birth_date: u.birth_date || '',
-          bio: u.bio || '',
-          location: u.location || ''
-        });
-      }).catch(() => { });
-    }
+    }).catch(() => { });
   }, []);
 
   const { data: attempts = [], isLoading } = useQuery({
