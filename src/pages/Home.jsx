@@ -14,23 +14,22 @@ import SmartTip from '@/components/home/SmartTip';
 import RecentActivity from '@/components/home/RecentActivity';
 import QuickActions from '@/components/home/QuickActions';
 
-export default function Home() {
-  const [user, setUser] = useState(null);
+import { useAuth } from '@/hooks/useAuth';
 
-  useEffect(() => {
-    base44.auth.me().then(setUser).catch(() => { });
-  }, []);
+export default function Home() {
+  const { user, loading } = useAuth();
 
   const { data: attempts = [] } = useQuery({
-    queryKey: ['attempts'],
+    queryKey: ['attempts', user?.id],
     queryFn: () => base44.entities.QuizAttempt.filter({ created_by: user?.email }, '-created_date', 10),
     enabled: !!user
   });
 
   const { data: userPoints } = useQuery({
-    queryKey: ['user-points', user?.email],
+    queryKey: ['user-points', user?.id],
     queryFn: async () => {
-      const points = await base44.entities.UserPoints.filter({ created_by: user?.email });
+      // Fetch points from real DB
+      const points = await base44.entities.UserPoints.filter({ user_id: user?.id });
       return points[0] || { total_points: 0, streak_days: 0 };
     },
     enabled: !!user

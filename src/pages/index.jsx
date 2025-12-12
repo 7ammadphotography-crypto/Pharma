@@ -75,87 +75,89 @@ import GroupChat from "./GroupChat";
 import AdminChatManagement from "./AdminChatManagement";
 
 import MyAccount from "./MyAccount";
+import Login from "./Login";
+import ProtectedRoute from "@/components/ProtectedRoute";
 
 import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
 
 const PAGES = {
-    
+
     Home: Home,
-    
+
     Questions: Questions,
-    
+
     Dashboard: Dashboard,
-    
+
     AIAssistant: AIAssistant,
-    
+
     Profile: Profile,
-    
+
     CompetencyDetail: CompetencyDetail,
-    
+
     Quiz: Quiz,
-    
+
     QuizResults: QuizResults,
-    
+
     Bookmarked: Bookmarked,
-    
+
     IncorrectAnswers: IncorrectAnswers,
-    
+
     SavedSummaries: SavedSummaries,
-    
+
     ResumeQuizzes: ResumeQuizzes,
-    
+
     DailyChallenge: DailyChallenge,
-    
+
     Leaderboard: Leaderboard,
-    
+
     Flashcards: Flashcards,
-    
+
     AIQuiz: AIQuiz,
-    
+
     PersonalizedReview: PersonalizedReview,
-    
+
     ManageChapters: ManageChapters,
-    
+
     ManageTopics: ManageTopics,
-    
+
     ManageQuestions: ManageQuestions,
-    
+
     AdminUsers: AdminUsers,
-    
+
     MockExamSetup: MockExamSetup,
-    
+
     MockExam: MockExam,
-    
+
     MockExamResults: MockExamResults,
-    
+
     Pricing: Pricing,
-    
+
     SubscriptionSuccess: SubscriptionSuccess,
-    
+
     AdminPanel: AdminPanel,
-    
+
     RewardsStore: RewardsStore,
-    
+
     Badges: Badges,
-    
+
     StudyPlan: StudyPlan,
-    
+
     PersonalizedFeedback: PersonalizedFeedback,
-    
+
     IncorrectAnswersSummary: IncorrectAnswersSummary,
-    
+
     TopicSummary: TopicSummary,
-    
+
     ManageCases: ManageCases,
-    
+
     AdminAISettings: AdminAISettings,
-    
+
     GroupChat: GroupChat,
-    
+
     AdminChatManagement: AdminChatManagement,
-    
+
     MyAccount: MyAccount,
-    
+
 }
 
 function _getCurrentPage(url) {
@@ -175,90 +177,55 @@ function _getCurrentPage(url) {
 function PagesContent() {
     const location = useLocation();
     const currentPage = _getCurrentPage(location.pathname);
-    
+
     return (
         <Layout currentPageName={currentPage}>
-            <Routes>            
-                
-                    <Route path="/" element={<Home />} />
-                
-                
-                <Route path="/Home" element={<Home />} />
-                
-                <Route path="/Questions" element={<Questions />} />
-                
-                <Route path="/Dashboard" element={<Dashboard />} />
-                
-                <Route path="/AIAssistant" element={<AIAssistant />} />
-                
-                <Route path="/Profile" element={<Profile />} />
-                
-                <Route path="/CompetencyDetail" element={<CompetencyDetail />} />
-                
-                <Route path="/Quiz" element={<Quiz />} />
-                
-                <Route path="/QuizResults" element={<QuizResults />} />
-                
-                <Route path="/Bookmarked" element={<Bookmarked />} />
-                
-                <Route path="/IncorrectAnswers" element={<IncorrectAnswers />} />
-                
-                <Route path="/SavedSummaries" element={<SavedSummaries />} />
-                
-                <Route path="/ResumeQuizzes" element={<ResumeQuizzes />} />
-                
-                <Route path="/DailyChallenge" element={<DailyChallenge />} />
-                
-                <Route path="/Leaderboard" element={<Leaderboard />} />
-                
-                <Route path="/Flashcards" element={<Flashcards />} />
-                
-                <Route path="/AIQuiz" element={<AIQuiz />} />
-                
-                <Route path="/PersonalizedReview" element={<PersonalizedReview />} />
-                
-                <Route path="/ManageChapters" element={<ManageChapters />} />
-                
-                <Route path="/ManageTopics" element={<ManageTopics />} />
-                
-                <Route path="/ManageQuestions" element={<ManageQuestions />} />
-                
-                <Route path="/AdminUsers" element={<AdminUsers />} />
-                
-                <Route path="/MockExamSetup" element={<MockExamSetup />} />
-                
-                <Route path="/MockExam" element={<MockExam />} />
-                
-                <Route path="/MockExamResults" element={<MockExamResults />} />
-                
-                <Route path="/Pricing" element={<Pricing />} />
-                
-                <Route path="/SubscriptionSuccess" element={<SubscriptionSuccess />} />
-                
-                <Route path="/AdminPanel" element={<AdminPanel />} />
-                
-                <Route path="/RewardsStore" element={<RewardsStore />} />
-                
-                <Route path="/Badges" element={<Badges />} />
-                
-                <Route path="/StudyPlan" element={<StudyPlan />} />
-                
-                <Route path="/PersonalizedFeedback" element={<PersonalizedFeedback />} />
-                
-                <Route path="/IncorrectAnswersSummary" element={<IncorrectAnswersSummary />} />
-                
-                <Route path="/TopicSummary" element={<TopicSummary />} />
-                
-                <Route path="/ManageCases" element={<ManageCases />} />
-                
-                <Route path="/AdminAISettings" element={<AdminAISettings />} />
-                
-                <Route path="/GroupChat" element={<GroupChat />} />
-                
-                <Route path="/AdminChatManagement" element={<AdminChatManagement />} />
-                
-                <Route path="/MyAccount" element={<MyAccount />} />
-                
+            <Routes>
+                {/* Public Route */}
+                <Route path="/login" element={<Login />} />
+
+                {/* Protected Routes */}
+                <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
+                <Route path="/Home" element={<ProtectedRoute><Home /></ProtectedRoute>} />
+                <Route path="/Questions" element={<ProtectedRoute><Questions /></ProtectedRoute>} />
+                <Route path="/Dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+                <Route path="/AIAssistant" element={<ProtectedRoute><AIAssistant /></ProtectedRoute>} />
+                <Route path="/Profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+                <Route path="/CompetencyDetail" element={<ProtectedRoute><CompetencyDetail /></ProtectedRoute>} />
+                <Route path="/Quiz" element={<ProtectedRoute><Quiz /></ProtectedRoute>} />
+                <Route path="/QuizResults" element={<ProtectedRoute><QuizResults /></ProtectedRoute>} />
+                <Route path="/Bookmarked" element={<ProtectedRoute><Bookmarked /></ProtectedRoute>} />
+                <Route path="/IncorrectAnswers" element={<ProtectedRoute><IncorrectAnswers /></ProtectedRoute>} />
+                <Route path="/SavedSummaries" element={<ProtectedRoute><SavedSummaries /></ProtectedRoute>} />
+                <Route path="/ResumeQuizzes" element={<ProtectedRoute><ResumeQuizzes /></ProtectedRoute>} />
+                <Route path="/DailyChallenge" element={<ProtectedRoute><DailyChallenge /></ProtectedRoute>} />
+                <Route path="/Leaderboard" element={<ProtectedRoute><Leaderboard /></ProtectedRoute>} />
+                <Route path="/Flashcards" element={<ProtectedRoute><Flashcards /></ProtectedRoute>} />
+                <Route path="/AIQuiz" element={<ProtectedRoute><AIQuiz /></ProtectedRoute>} />
+                <Route path="/PersonalizedReview" element={<ProtectedRoute><PersonalizedReview /></ProtectedRoute>} />
+                <Route path="/MockExamSetup" element={<ProtectedRoute><MockExamSetup /></ProtectedRoute>} />
+                <Route path="/MockExam" element={<ProtectedRoute><MockExam /></ProtectedRoute>} />
+                <Route path="/MockExamResults" element={<ProtectedRoute><MockExamResults /></ProtectedRoute>} />
+                <Route path="/Pricing" element={<ProtectedRoute><Pricing /></ProtectedRoute>} />
+                <Route path="/SubscriptionSuccess" element={<ProtectedRoute><SubscriptionSuccess /></ProtectedRoute>} />
+                <Route path="/RewardsStore" element={<ProtectedRoute><RewardsStore /></ProtectedRoute>} />
+                <Route path="/Badges" element={<ProtectedRoute><Badges /></ProtectedRoute>} />
+                <Route path="/StudyPlan" element={<ProtectedRoute><StudyPlan /></ProtectedRoute>} />
+                <Route path="/PersonalizedFeedback" element={<ProtectedRoute><PersonalizedFeedback /></ProtectedRoute>} />
+                <Route path="/IncorrectAnswersSummary" element={<ProtectedRoute><IncorrectAnswersSummary /></ProtectedRoute>} />
+                <Route path="/TopicSummary" element={<ProtectedRoute><TopicSummary /></ProtectedRoute>} />
+                <Route path="/GroupChat" element={<ProtectedRoute><GroupChat /></ProtectedRoute>} />
+                <Route path="/MyAccount" element={<ProtectedRoute><MyAccount /></ProtectedRoute>} />
+
+                {/* Admin Routes */}
+                <Route path="/ManageChapters" element={<ProtectedRoute adminOnly><ManageChapters /></ProtectedRoute>} />
+                <Route path="/ManageTopics" element={<ProtectedRoute adminOnly><ManageTopics /></ProtectedRoute>} />
+                <Route path="/ManageQuestions" element={<ProtectedRoute adminOnly><ManageQuestions /></ProtectedRoute>} />
+                <Route path="/AdminUsers" element={<ProtectedRoute adminOnly><AdminUsers /></ProtectedRoute>} />
+                <Route path="/AdminPanel" element={<ProtectedRoute adminOnly><AdminPanel /></ProtectedRoute>} />
+                <Route path="/ManageCases" element={<ProtectedRoute adminOnly><ManageCases /></ProtectedRoute>} />
+                <Route path="/AdminAISettings" element={<ProtectedRoute adminOnly><AdminAISettings /></ProtectedRoute>} />
+                <Route path="/AdminChatManagement" element={<ProtectedRoute adminOnly><AdminChatManagement /></ProtectedRoute>} />
             </Routes>
         </Layout>
     );

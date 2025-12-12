@@ -31,7 +31,16 @@ export const AuthProvider = ({ children }) => {
         supabase.auth.getSession().then(async ({ data: { session } }) => {
             setUser(session?.user ?? null);
             if (session?.user) {
-                const p = await fetchProfile(session.user.id);
+                let p = await fetchProfile(session.user.id);
+                if (!p) {
+                    const { error } = await supabase.from('profiles').upsert({
+                        id: session.user.id,
+                        email: session.user.email,
+                        full_name: session.user.user_metadata?.full_name || 'Student',
+                        role: 'student'
+                    });
+                    if (!error) p = await fetchProfile(session.user.id);
+                }
                 setProfile(p);
             }
             setLoading(false);
@@ -41,7 +50,16 @@ export const AuthProvider = ({ children }) => {
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
             setUser(session?.user ?? null);
             if (session?.user) {
-                const p = await fetchProfile(session.user.id);
+                let p = await fetchProfile(session.user.id);
+                if (!p) {
+                    const { error } = await supabase.from('profiles').upsert({
+                        id: session.user.id,
+                        email: session.user.email,
+                        full_name: session.user.user_metadata?.full_name || 'Student',
+                        role: 'student'
+                    });
+                    if (!error) p = await fetchProfile(session.user.id);
+                }
                 setProfile(p);
             } else {
                 setProfile(null);
