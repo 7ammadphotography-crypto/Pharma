@@ -142,27 +142,18 @@ export default function GroupChat() {
 
   const createMessageMutation = useMutation({
     mutationFn: async (newMessage) => {
-      console.log('Sending API request to create row...');
       try {
-        const res = await base44.integrations.Core.CreateRow({
-          model_name: "chat_messages",
-          data: {
-            ...newMessage,
-            timestamp: new Date().toISOString(),
-            likes: 0,
-            liked_by: [],
-            is_pinned: false
-          }
+        return await base44.entities.ChatMessage.create({
+          ...newMessage,
+          likes: 0,
+          is_pinned: false
         });
-        console.log('API Response:', res);
-        return res;
       } catch (error) {
-        console.error('API Error in createMessageMutation:', error);
+        console.error('Create message error:', error);
         throw error;
       }
     },
     onSuccess: () => {
-      console.log('Message sent successfully!');
       setMessage('');
       setUploadedFiles([]);
       setQuestionOptions(['', '', '', '']);
@@ -172,18 +163,13 @@ export default function GroupChat() {
       setTimeout(scrollToBottom, 100);
     },
     onError: (error) => {
-      console.error('Mutation failed:', error);
       toast.error('Failed to send message: ' + error.message);
     }
   });
 
   const updateMessageMutation = useMutation({
     mutationFn: async ({ id, data }) => {
-      await base44.integrations.Core.UpdateRow({
-        model_name: "chat_messages",
-        id,
-        data
-      });
+      await base44.entities.ChatMessage.update(id, data);
     },
     onSuccess: () => {
       setEditingMessage(null);
@@ -244,9 +230,9 @@ export default function GroupChat() {
 
     try {
       for (const file of files) {
-        const { data } = await base44.integrations.Core.UploadFile({ file });
-        if (data && data.file_url) {
-          uploadedUrls.push(data.file_url);
+        const { file_url } = await base44.storage.upload({ file });
+        if (file_url) {
+          uploadedUrls.push(file_url);
         }
       }
       setUploadedFiles([...uploadedFiles, ...uploadedUrls]);
@@ -275,8 +261,8 @@ export default function GroupChat() {
       const uploadedUrls = [];
       try {
         for (const file of files) {
-          const { data } = await base44.integrations.Core.UploadFile({ file });
-          if (data && data.file_url) uploadedUrls.push(data.file_url);
+          const { file_url } = await base44.storage.upload({ file });
+          if (file_url) uploadedUrls.push(file_url);
         }
         setUploadedFiles(prev => [...prev, ...uploadedUrls]);
         toast.success('Image pasted successfully');
@@ -300,8 +286,8 @@ export default function GroupChat() {
     const uploadedUrls = [];
     try {
       for (const file of files) {
-        const { data } = await base44.integrations.Core.UploadFile({ file });
-        if (data && data.file_url) uploadedUrls.push(data.file_url);
+        const { file_url } = await base44.storage.upload({ file });
+        if (file_url) uploadedUrls.push(file_url);
       }
       setUploadedFiles(prev => [...prev, ...uploadedUrls]);
       toast.success('Files dropped successfully');
@@ -341,14 +327,14 @@ export default function GroupChat() {
     setUploading(true);
     try {
       const file = new File([audioBlob], `voice-${Date.now()}.webm`, { type: 'audio/webm' });
-      const { data } = await base44.integrations.Core.UploadFile({ file });
+      const { file_url } = await base44.storage.upload({ file });
 
-      if (data?.file_url) {
+      if (file_url) {
         const messageData = {
           content: `🎤 Voice message (${Math.floor(duration)}s)`,
           user_name: user.full_name || user.email,
           user_email: user.email,
-          voice_url: data.file_url,
+          voice_url: file_url,
           voice_duration: duration,
           is_voice: true,
         };
@@ -747,9 +733,7 @@ export default function GroupChat() {
             onClose={() => setShowSidebar(false)}
             user={user}
             onUserClick={handleUserClick}
-            onlineUsers={[
-              'User 1', 'User 2', 'Ahmed', 'Admin' // Mock data
-            ]}
+            onlineUsers={allUsers.map(u => u.full_name || u.email)}
             media={
               messages.flatMap(m => m.file_urls || []).reverse()
             }

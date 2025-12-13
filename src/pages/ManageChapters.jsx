@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { toast } from 'sonner';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card } from "@/components/ui/card";
@@ -64,17 +65,40 @@ export default function ManageChapters() {
 
   const createMutation = useMutation({
     mutationFn: (data) => base44.entities.Competency.create(data),
-    onSuccess: () => { queryClient.invalidateQueries(['competencies']); resetForm(); }
+    onSuccess: () => {
+      queryClient.invalidateQueries(['competencies']);
+      resetForm();
+      toast.success('Chapter created successfully');
+    },
+    onError: (error) => {
+      console.error(error);
+      toast.error(error.message || 'Failed to create chapter');
+    }
   });
 
   const updateMutation = useMutation({
     mutationFn: ({ id, data }) => base44.entities.Competency.update(id, data),
-    onSuccess: () => { queryClient.invalidateQueries(['competencies']); resetForm(); }
+    onSuccess: () => {
+      queryClient.invalidateQueries(['competencies']);
+      resetForm();
+      toast.success('Chapter updated successfully');
+    },
+    onError: (error) => {
+      console.error(error);
+      toast.error(error.message || 'Failed to update chapter');
+    }
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id) => base44.entities.Competency.delete(id),
-    onSuccess: () => queryClient.invalidateQueries(['competencies'])
+    onSuccess: () => {
+      queryClient.invalidateQueries(['competencies']);
+      toast.success('Chapter deleted');
+    },
+    onError: (error) => {
+      console.error(error);
+      toast.error(error.message || 'Failed to delete chapter');
+    }
   });
 
   const createTopicMutation = useMutation({
@@ -83,22 +107,48 @@ export default function ManageChapters() {
       queryClient.invalidateQueries(['topics']);
       setNewTopicForm({ title: '', description: '' });
       setTopicDialogOpen(false);
+      toast.success('Topic created');
+    },
+    onError: (error) => {
+      console.error(error);
+      toast.error(error.message || 'Failed to create topic');
     }
   });
 
   const updateTopicMutation = useMutation({
     mutationFn: ({ id, data }) => base44.entities.Topic.update(id, data),
-    onSuccess: () => queryClient.invalidateQueries(['topics'])
+    onSuccess: () => {
+      queryClient.invalidateQueries(['topics']);
+      toast.success('Topic updated');
+    },
+    onError: (error) => {
+      console.error(error);
+      toast.error(error.message || 'Failed to update topic');
+    }
   });
 
   const deleteTopicMutation = useMutation({
     mutationFn: (id) => base44.entities.Topic.delete(id),
-    onSuccess: () => queryClient.invalidateQueries(['topics'])
+    onSuccess: () => {
+      queryClient.invalidateQueries(['topics']);
+      toast.success('Topic deleted');
+    },
+    onError: (error) => {
+      console.error(error);
+      toast.error(error.message || 'Failed to delete topic');
+    }
   });
 
   const unlinkTopicMutation = useMutation({
     mutationFn: ({ topicId }) => base44.entities.Topic.update(topicId, { competency_id: null }),
-    onSuccess: () => queryClient.invalidateQueries(['topics'])
+    onSuccess: () => {
+      queryClient.invalidateQueries(['topics']);
+      toast.success('Topic unlinked');
+    },
+    onError: (error) => {
+      console.error(error);
+      toast.error(error.message || 'Failed to unlink topic');
+    }
   });
 
   const resetForm = () => {
@@ -129,7 +179,7 @@ export default function ManageChapters() {
     }
   };
 
-  const filteredChapters = chapters.filter(c => 
+  const filteredChapters = chapters.filter(c =>
     c.title.toLowerCase().includes(search.toLowerCase())
   );
 
@@ -150,8 +200,8 @@ export default function ManageChapters() {
         <div className="flex items-center gap-2 max-w-md">
           <div className="relative flex-1">
             <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-            <Input 
-              placeholder="Search chapters..." 
+            <Input
+              placeholder="Search chapters..."
               value={search}
               onChange={e => setSearch(e.target.value)}
               className="bg-zinc-900/50 border-zinc-800 pr-10"
@@ -190,7 +240,7 @@ export default function ManageChapters() {
                   const colorClass = colors.find(c => c.value === chapter.color)?.class || 'bg-blue-500';
                   const chapterTopics = getTopicsForChapter(chapter.id);
                   const isExpanded = expandedChapter === chapter.id;
-                  
+
                   return (
                     <React.Fragment key={chapter.id}>
                       <TableRow className="border-white/5 hover:bg-white/5">
@@ -238,7 +288,7 @@ export default function ManageChapters() {
                           </DropdownMenu>
                         </TableCell>
                       </TableRow>
-                      
+
                       {/* Expanded Topics Section */}
                       <AnimatePresence>
                         {isExpanded && (
@@ -261,7 +311,7 @@ export default function ManageChapters() {
                                       <Plus className="w-3 h-3 mr-1" /> Add Topic
                                     </Button>
                                   </div>
-                                  
+
                                   {chapterTopics.length === 0 ? (
                                     <p className="text-slate-500 text-sm text-center py-4">No topics linked to this chapter</p>
                                   ) : (
@@ -323,7 +373,7 @@ export default function ManageChapters() {
             <div className="space-y-4">
               <div>
                 <label className="text-sm text-slate-400 mb-1 block">Chapter Name *</label>
-                <Input 
+                <Input
                   value={form.title}
                   onChange={(e) => setForm({ ...form, title: e.target.value })}
                   className="bg-zinc-800 border-zinc-700"
@@ -332,7 +382,7 @@ export default function ManageChapters() {
 
               <div>
                 <label className="text-sm text-slate-400 mb-1 block">Description</label>
-                <Textarea 
+                <Textarea
                   value={form.description}
                   onChange={(e) => setForm({ ...form, description: e.target.value })}
                   className="bg-zinc-800 border-zinc-700"
@@ -381,7 +431,7 @@ export default function ManageChapters() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="text-sm text-slate-400 mb-1 block">Weight (%)</label>
-                  <Input 
+                  <Input
                     type="number"
                     value={form.weight}
                     onChange={(e) => setForm({ ...form, weight: Number(e.target.value) })}
@@ -390,7 +440,7 @@ export default function ManageChapters() {
                 </div>
                 <div>
                   <label className="text-sm text-slate-400 mb-1 block">Order</label>
-                  <Input 
+                  <Input
                     type="number"
                     value={form.order}
                     onChange={(e) => setForm({ ...form, order: Number(e.target.value) })}
@@ -403,8 +453,8 @@ export default function ManageChapters() {
                 <Button variant="outline" onClick={resetForm} className="flex-1 border-zinc-700">
                   Cancel
                 </Button>
-                <Button 
-                  onClick={handleSubmit} 
+                <Button
+                  onClick={handleSubmit}
                   disabled={!form.title.trim() || createMutation.isPending || updateMutation.isPending}
                   className="flex-1 bg-indigo-600"
                 >

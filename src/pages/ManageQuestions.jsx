@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
+import { toast } from 'sonner';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card } from "@/components/ui/card";
@@ -22,7 +23,7 @@ import BulkQuestionCreator from '@/components/admin/BulkQuestionCreator';
 export default function ManageQuestions() {
   const urlParams = new URLSearchParams(window.location.search);
   const preselectedCaseId = urlParams.get('case') || '';
-  
+
   const [isOpen, setIsOpen] = useState(false);
   const [editItem, setEditItem] = useState(null);
   const [search, setSearch] = useState('');
@@ -47,7 +48,7 @@ export default function ManageQuestions() {
     title: '', case_text: '', image_url: '', difficulty: 'medium',
     competency_id: '', topic_id: '', tags: []
   });
-  
+
   const queryClient = useQueryClient();
 
   // Data fetching
@@ -113,6 +114,11 @@ export default function ManageQuestions() {
       queryClient.invalidateQueries(['questions']);
       queryClient.invalidateQueries(['topic-questions']);
       resetForm();
+      toast.success('Question created successfully');
+    },
+    onError: (error) => {
+      console.error(error);
+      toast.error(error.message || 'Failed to create question');
     }
   });
 
@@ -120,17 +126,17 @@ export default function ManageQuestions() {
     mutationFn: async ({ id, questionData, topicIds }) => {
       // Update question
       await base44.entities.Question.update(id, questionData);
-      
+
       // Sync topic links
       const currentLinks = topicQuestions.filter(tq => tq.question_id === id);
       const currentTopicIds = currentLinks.map(tq => tq.topic_id);
-      
+
       // Delete removed links
       const toDelete = currentLinks.filter(tq => !topicIds.includes(tq.topic_id));
       for (const link of toDelete) {
         await base44.entities.TopicQuestion.delete(link.id);
       }
-      
+
       // Add new links
       const toAdd = topicIds.filter(tid => !currentTopicIds.includes(tid));
       if (toAdd.length > 0) {
@@ -145,6 +151,11 @@ export default function ManageQuestions() {
       queryClient.invalidateQueries(['questions']);
       queryClient.invalidateQueries(['topic-questions']);
       resetForm();
+      toast.success('Question updated successfully');
+    },
+    onError: (error) => {
+      console.error(error);
+      toast.error(error.message || 'Failed to update question');
     }
   });
 
@@ -160,37 +171,24 @@ export default function ManageQuestions() {
     onSuccess: () => {
       queryClient.invalidateQueries(['questions']);
       queryClient.invalidateQueries(['topic-questions']);
+      toast.success('Question deleted');
+    },
+    onError: (error) => {
+      console.error(error);
+      toast.error(error.message || 'Failed to delete question');
     }
   });
-
-  const resetForm = () => {
-    setForm({ question_text: '', options: ['', '', '', ''], correct_answer: 0, explanation: '', difficulty: 'medium', tags: [], case_id: preselectedCaseId || '' });
-    setSelectedTopicIds([]);
-    setEditItem(null);
-    setIsOpen(false);
-    setTagInput('');
-  };
-
-  const duplicateQuestion = (q) => {
-    setForm({ ...q, options: q.options || ['', '', '', ''], tags: q.tags || [], case_id: q.case_id || '' });
-    setEditItem(null);
-    const currentTopicIds = topicQuestions
-      .filter(tq => tq.question_id === q.id)
-      .map(tq => tq.topic_id);
-    setSelectedTopicIds(currentTopicIds);
-    setIsOpen(true);
-  };
-
-  const resetCaseForm = () => {
-    setCaseForm({ title: '', case_text: '', image_url: '', difficulty: 'medium', competency_id: '', topic_id: '', tags: [] });
-    setShowCaseDialog(false);
-  };
 
   const createCaseMutation = useMutation({
     mutationFn: (data) => base44.entities.Case.create(data),
     onSuccess: () => {
       queryClient.invalidateQueries(['cases']);
       resetCaseForm();
+      toast.success('Case created successfully');
+    },
+    onError: (error) => {
+      console.error(error);
+      toast.error(error.message || 'Failed to create case');
     }
   });
 
@@ -208,7 +206,7 @@ export default function ManageQuestions() {
   const handleSubmit = () => {
     if (!form.question_text) return;
     const questionData = { ...form };
-    
+
     if (editItem) {
       updateMutation.mutate({ id: editItem.id, questionData, topicIds: selectedTopicIds });
     } else {
@@ -228,7 +226,7 @@ export default function ManageQuestions() {
     return questions.filter(q => {
       const matchSearch = q.question_text.toLowerCase().includes(search.toLowerCase());
       const matchDiff = filterDiff === 'all' || q.difficulty === filterDiff;
-      
+
       // Filter by topic
       let matchTopic = true;
       if (filterTopic !== 'all') {
@@ -243,7 +241,7 @@ export default function ManageQuestions() {
       } else if (filterCase !== 'all') {
         matchCase = q.case_id === filterCase;
       }
-      
+
       return matchSearch && matchDiff && matchTopic && matchCase;
     });
   }, [questions, search, filterDiff, filterTopic, filterCase, topicQuestions]);
@@ -251,7 +249,7 @@ export default function ManageQuestions() {
   // Group by case if enabled
   const groupedQuestions = useMemo(() => {
     if (!groupByCase) return { ungrouped: filtered };
-    
+
     const groups = { 'No Case': [], };
     filtered.forEach(q => {
       if (!q.case_id) {
@@ -299,8 +297,8 @@ export default function ManageQuestions() {
         <div className="flex gap-3 flex-wrap items-center">
           <div className="relative flex-1 min-w-[200px]">
             <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-            <Input 
-              placeholder="Search questions..." 
+            <Input
+              placeholder="Search questions..."
               value={search} onChange={e => setSearch(e.target.value)}
               className="bg-zinc-900/50 border-zinc-800 pr-10"
             />
@@ -368,7 +366,7 @@ export default function ManageQuestions() {
             {Object.entries(groupedQuestions).map(([caseName, questions]) => {
               if (questions.length === 0) return null;
               const caseItem = cases.find(c => c.title === caseName);
-              
+
               return (
                 <Card key={caseName} className="glass-card border-0 overflow-hidden">
                   <div className="bg-cyan-900/20 border-b border-cyan-500/20 p-4 flex items-center justify-between">
@@ -406,9 +404,9 @@ export default function ManageQuestions() {
                             </TableCell>
                             <TableCell className="w-[100px]">
                               <Badge variant="outline" className={
-                                q.difficulty === 'easy' ? 'text-green-400 border-green-500/20' : 
-                                q.difficulty === 'hard' ? 'text-red-400 border-red-500/20' : 
-                                'text-amber-400 border-amber-500/20'
+                                q.difficulty === 'easy' ? 'text-green-400 border-green-500/20' :
+                                  q.difficulty === 'hard' ? 'text-red-400 border-red-500/20' :
+                                    'text-amber-400 border-amber-500/20'
                               }>
                                 {q.difficulty}
                               </Badge>
@@ -457,7 +455,7 @@ export default function ManageQuestions() {
                   filtered.map(q => {
                     const qTopics = getTopicsForQuestion(q.id);
                     const qCase = q.case_id ? cases.find(c => c.id === q.case_id) : null;
-                    
+
                     return (
                       <TableRow key={q.id} className="border-white/5 hover:bg-white/5">
                         <TableCell className="font-medium text-white max-w-[300px]">
@@ -489,9 +487,9 @@ export default function ManageQuestions() {
                         </TableCell>
                         <TableCell>
                           <Badge variant="outline" className={
-                            q.difficulty === 'easy' ? 'text-green-400 border-green-500/20' : 
-                            q.difficulty === 'hard' ? 'text-red-400 border-red-500/20' : 
-                            'text-amber-400 border-amber-500/20'
+                            q.difficulty === 'easy' ? 'text-green-400 border-green-500/20' :
+                              q.difficulty === 'hard' ? 'text-red-400 border-red-500/20' :
+                                'text-amber-400 border-amber-500/20'
                           }>
                             {q.difficulty === 'easy' ? 'Easy' : q.difficulty === 'hard' ? 'Hard' : 'Medium'}
                           </Badge>
@@ -548,7 +546,7 @@ export default function ManageQuestions() {
               {/* Topics Multi-Select */}
               <div>
                 <label className="text-sm text-slate-400 mb-2 block">Related Topics</label>
-                <TopicMultiSelect 
+                <TopicMultiSelect
                   topics={topics}
                   competencies={chapters}
                   selectedTopicIds={selectedTopicIds}
@@ -566,7 +564,7 @@ export default function ManageQuestions() {
                 <div className="space-y-2">
                   {form.options.map((opt, i) => (
                     <div key={i} className="flex items-center gap-2">
-                      <div 
+                      <div
                         className={`w-6 h-6 rounded-full flex items-center justify-center cursor-pointer border ${form.correct_answer === i ? 'bg-green-500 border-green-500' : 'border-zinc-600'}`}
                         onClick={() => setForm({ ...form, correct_answer: i })}
                       >
@@ -654,7 +652,7 @@ Provide a clear, educational explanation of why this answer is correct and why t
         </Dialog>
 
         {/* AI Question Generator */}
-        <AIQuestionGenerator 
+        <AIQuestionGenerator
           chapters={chapters}
           topics={topics}
           open={showAIGenerator}
@@ -701,20 +699,20 @@ Provide a clear, educational explanation of why this answer is correct and why t
             <div className="space-y-4">
               <div>
                 <label className="text-sm text-slate-400">Case Title</label>
-                <Input 
-                  value={caseForm.title} 
-                  onChange={e => setCaseForm({ ...caseForm, title: e.target.value })} 
-                  className="bg-zinc-800 border-zinc-700 mt-1" 
+                <Input
+                  value={caseForm.title}
+                  onChange={e => setCaseForm({ ...caseForm, title: e.target.value })}
+                  className="bg-zinc-800 border-zinc-700 mt-1"
                   placeholder="e.g., Patient with Hypertension and Diabetes"
                 />
               </div>
 
               <div>
                 <label className="text-sm text-slate-400">Clinical Scenario Text</label>
-                <Textarea 
-                  value={caseForm.case_text} 
-                  onChange={e => setCaseForm({ ...caseForm, case_text: e.target.value })} 
-                  className="bg-zinc-800 border-zinc-700 mt-1 min-h-[200px]" 
+                <Textarea
+                  value={caseForm.case_text}
+                  onChange={e => setCaseForm({ ...caseForm, case_text: e.target.value })}
+                  className="bg-zinc-800 border-zinc-700 mt-1 min-h-[200px]"
                   placeholder="A 55-year-old male patient presents to the pharmacy with..."
                 />
               </div>
@@ -767,17 +765,17 @@ Provide a clear, educational explanation of why this answer is correct and why t
 
               <div>
                 <label className="text-sm text-slate-400">Image URL (Optional)</label>
-                <Input 
-                  value={caseForm.image_url} 
-                  onChange={e => setCaseForm({ ...caseForm, image_url: e.target.value })} 
-                  className="bg-zinc-800 border-zinc-700 mt-1" 
+                <Input
+                  value={caseForm.image_url}
+                  onChange={e => setCaseForm({ ...caseForm, image_url: e.target.value })}
+                  className="bg-zinc-800 border-zinc-700 mt-1"
                   placeholder="https://example.com/lab-results.png"
                 />
               </div>
 
-              <Button 
-                onClick={handleCaseSubmit} 
-                disabled={createCaseMutation.isPending || !caseForm.title || !caseForm.case_text} 
+              <Button
+                onClick={handleCaseSubmit}
+                disabled={createCaseMutation.isPending || !caseForm.title || !caseForm.case_text}
                 className="w-full bg-cyan-600 hover:bg-cyan-700"
               >
                 {createCaseMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Plus className="w-4 h-4 mr-2" />}

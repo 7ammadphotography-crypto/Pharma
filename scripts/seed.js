@@ -10,13 +10,16 @@ const __dirname = path.dirname(__filename);
 dotenv.config({ path: path.resolve(__dirname, '../.env') });
 dotenv.config({ path: path.resolve(__dirname, '../.env.local') });
 
-const supabaseUrl = process.env.VITE_SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_ANON_KEY;
+
+const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 if (!supabaseUrl || !supabaseKey) {
-    console.error('Error: VITE_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY (or ANON) are required in .env');
+    console.error('Error: Missing server-side env vars.');
+    console.error('Required: SUPABASE_URL (or VITE_SUPABASE_URL) and SUPABASE_SERVICE_ROLE_KEY');
     process.exit(1);
 }
+
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
@@ -69,9 +72,15 @@ async function seed() {
 
     // 1. Upsert Competencies (Chapters)
     console.log('Creating Competencies...');
+    // Map to include both title and name to satisfy potential legacy schema
+    const compPayload = COMPETENCIES.map(c => ({
+        ...c,
+        name: c.title // Fallback for 'name' column
+    }));
+
     const { data: comps, error: compError } = await supabase
         .from('competencies')
-        .upsert(COMPETENCIES, { onConflict: 'title' })
+        .upsert(compPayload, { onConflict: 'title' })
         .select();
 
     if (compError) throw compError;
@@ -80,9 +89,13 @@ async function seed() {
     // 2. Upsert Topics
     let allTopics = [];
     for (const comp of comps) {
-        const topicNames = TOPICS_MAP[comp.title] || [];
+        // Handle both name and title from returned object (in case DB returned one or other)
+        const compTitle = comp.title || comp.name;
+        const topicNames = TOPICS_MAP[compTitle] || [];
+
         const topicsPayload = topicNames.map((t, i) => ({
             title: t,
+            name: t, // Fallback for 'name' column
             competency_id: comp.id,
             order: i + 1,
             description: `Study of ${t}`
@@ -108,7 +121,7 @@ async function seed() {
 
         const { data: newCase, error: cError } = await supabase
             .from('cases')
-            .upsert({ ...payload, topic_id: topic?.id, competency_id: topic?.competency_id }, { onConflict: 'title' }) // Upsert by title if possible, or just insert
+            .upsert({ ...payload, topic_id: topic?.id }, { onConflict: 'title' }) // Upsert by title if possible, or just insert
             .select()
             .single();
 

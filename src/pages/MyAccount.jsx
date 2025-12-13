@@ -83,12 +83,19 @@ export default function MyAccount() {
     : 100;
 
   // Mock extended stats for Badges (in real app, calculate/fetch these)
+  // Extended stats for Badges
+  // In a real app, you might want to fetch 'chat_messages' count or store it in 'user_points' logic
+  // For now, we will default 'messages_sent' to 0 if not tracked, or we can fetch it.
+  // To keep it performant, we'll just set defaults that don't rely on heavy queries unless needed.
   const extendedStats = {
     ...userPoints,
-    early_morning_quizzes: 2, // Mock
+    early_morning_quizzes: attempts.filter(a => {
+      const h = new Date(a.created_date).getHours();
+      return h >= 5 && h < 9;
+    }).length,
     perfect_scores: completedAttempts.filter(a => a.percentage === 100).length,
-    messages_sent: 120, // Mock
-    total_questions_answered: attempts.length * 10 // Approx
+    messages_sent: userPoints?.messages_sent || 0, // Ensure this field exists in DB or default to 0
+    total_questions_answered: attempts.reduce((acc, curr) => acc + (curr.total_questions || 0), 0)
   };
 
   const handleSave = async () => {

@@ -143,6 +143,15 @@ const supabaseAdapter = {
       await supabase.auth.signOut();
     }
   },
+  storage: {
+    upload: async ({ file, bucket = 'chat-uploads' }) => {
+      const fileName = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '')}`;
+      const { data, error } = await supabase.storage.from(bucket).upload(fileName, file);
+      if (error) throw error;
+      const { data: { publicUrl } } = supabase.storage.from(bucket).getPublicUrl(fileName);
+      return { file_url: publicUrl };
+    }
+  },
   entities: {}
 };
 
