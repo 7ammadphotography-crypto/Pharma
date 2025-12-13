@@ -38,6 +38,7 @@ export default function MyAccount() {
   const isDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
 
   useEffect(() => {
+    setLoading(true);
     base44.auth.me().then(u => {
       setUser(u);
       setEditData({
@@ -47,13 +48,18 @@ export default function MyAccount() {
         bio: u.bio || '',
         location: u.location || ''
       });
-    }).catch(() => { });
+      setLoading(false);
+    }).catch((err) => {
+      console.error("Auth failed:", err);
+      // If auth fails, we probably shouldn't stay on this page or show empty state
+      setLoading(false);
+    });
   }, []);
 
-  const { data: attempts = [], isLoading } = useQuery({
-    queryKey: ['user-attempts', user?.email],
-    queryFn: () => base44.entities.QuizAttempt.filter({ created_by: user?.email }, '-created_date'),
-    enabled: !!user
+  const { data: attempts = [], isLoading: attemptsLoading } = useQuery({
+    queryKey: ['user-attempts', user?.id],
+    queryFn: () => base44.entities.QuizAttempt.filter({ user_id: user?.id }, '-created_date'),
+    enabled: !!user?.id
   });
 
   const { data: competencies = [] } = useQuery({
@@ -62,12 +68,13 @@ export default function MyAccount() {
   });
 
   const { data: userPoints } = useQuery({
-    queryKey: ['user-points', user?.email],
+    queryKey: ['user-points', user?.id],
     queryFn: async () => {
-      const points = await base44.entities.UserPoints.filter({ created_by: user?.email });
+      // Fetch by user_id
+      const points = await base44.entities.UserPoints.filter({ user_id: user?.id });
       return points[0] || { total_points: 0, streak_days: 0 };
     },
-    enabled: !!user
+    enabled: !!user?.id
   });
 
   const completedAttempts = attempts.filter(a => a.is_completed);
