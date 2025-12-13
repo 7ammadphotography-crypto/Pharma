@@ -32,9 +32,7 @@ export default function AdminUsers() {
   const [filterSubscription, setFilterSubscription] = useState('all');
   const [selectedUser, setSelectedUser] = useState(null);
   const [showUserDialog, setShowUserDialog] = useState(false);
-  const queryClient = useQueryClient();
-
-  const { data: users = [], isLoading } = useQuery({
+  const { data: users = [], isLoading, isError, error } = useQuery({
     queryKey: ['users'],
     queryFn: () => base44.entities.User.list()
   });
@@ -62,8 +60,8 @@ export default function AdminUsers() {
     const userAttempts = attempts.filter(a => a.created_by === email);
     const userPoints = points.find(p => p.created_by === email);
     const completed = userAttempts.filter(a => a.is_completed);
-    
-    const avgScore = completed.length > 0 
+
+    const avgScore = completed.length > 0
       ? Math.round(completed.reduce((sum, a) => sum + (a.percentage || 0), 0) / completed.length)
       : 0;
 
@@ -76,12 +74,12 @@ export default function AdminUsers() {
   };
 
   const filteredUsers = users.filter(u => {
-    const matchesSearch = u.full_name?.toLowerCase().includes(search.toLowerCase()) || 
-                          u.email?.toLowerCase().includes(search.toLowerCase());
+    const matchesSearch = u.full_name?.toLowerCase().includes(search.toLowerCase()) ||
+      u.email?.toLowerCase().includes(search.toLowerCase());
     const matchesRole = filterRole === 'all' || u.role === filterRole;
-    const matchesSubscription = filterSubscription === 'all' || 
-                                 (filterSubscription === 'active' && u.subscription_status === 'active') ||
-                                 (filterSubscription === 'free' && (!u.subscription_status || u.subscription_status === 'none'));
+    const matchesSubscription = filterSubscription === 'all' ||
+      (filterSubscription === 'active' && u.subscription_status === 'active') ||
+      (filterSubscription === 'free' && (!u.subscription_status || u.subscription_status === 'none'));
     return matchesSearch && matchesRole && matchesSubscription;
   });
 
@@ -181,9 +179,9 @@ export default function AdminUsers() {
         <div className="flex flex-wrap gap-3">
           <div className="relative flex-1 min-w-[200px] max-w-md">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-            <Input 
-              placeholder="Search by name or email..." 
-              value={search} 
+            <Input
+              placeholder="Search by name or email..."
+              value={search}
               onChange={e => setSearch(e.target.value)}
               className="bg-zinc-900/50 border-zinc-800 pl-10"
             />
@@ -231,7 +229,20 @@ export default function AdminUsers() {
               {isLoading ? (
                 <TableRow>
                   <TableCell colSpan={7} className="text-center py-8">
-                    <Loader2 className="w-6 h-6 animate-spin mx-auto"/>
+                    <Loader2 className="w-6 h-6 animate-spin mx-auto" />
+                  </TableCell>
+                </TableRow>
+              ) : isError ? (
+                <TableRow>
+                  <TableCell colSpan={7} className="text-center py-8 text-red-400">
+                    <div className="flex flex-col items-center gap-2">
+                      <Shield className="w-8 h-8 opacity-50" />
+                      <p className="font-medium">Access Denied</p>
+                      <p className="text-xs text-slate-500 max-w-xs mx-auto">
+                        Database policies (RLS) are blocking your access. Run the provided SQL script in Supabase to fix this.
+                      </p>
+                      <p className="text-xs font-mono text-zinc-600 mt-2">{error?.message}</p>
+                    </div>
                   </TableCell>
                 </TableRow>
               ) : filteredUsers.length === 0 ? (
@@ -271,13 +282,13 @@ export default function AdminUsers() {
                       </TableCell>
                       <TableCell>
                         <Badge className={roleConfig.color}>
-                          <RoleIcon className="w-3 h-3 mr-1"/> {roleConfig.label}
+                          <RoleIcon className="w-3 h-3 mr-1" /> {roleConfig.label}
                         </Badge>
                       </TableCell>
                       <TableCell>
                         {u.subscription_status === 'active' ? (
                           <Badge className="bg-green-500/20 text-green-400 border-green-500/20">
-                            <Crown className="w-3 h-3 mr-1"/> Premium
+                            <Crown className="w-3 h-3 mr-1" /> Premium
                           </Badge>
                         ) : (
                           <Badge variant="outline" className="text-slate-400 border-slate-700">
@@ -306,9 +317,9 @@ export default function AdminUsers() {
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex items-center justify-end gap-1">
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
+                          <Button
+                            variant="ghost"
+                            size="sm"
                             className="text-slate-400 hover:text-white"
                             onClick={() => handleEditUser(u)}
                           >
@@ -323,10 +334,10 @@ export default function AdminUsers() {
                             <DropdownMenuContent align="end" className="w-56">
                               <DropdownMenuLabel>Quick Actions</DropdownMenuLabel>
                               <DropdownMenuSeparator />
-                              
+
                               <DropdownMenuLabel className="text-xs text-slate-500">Change Role</DropdownMenuLabel>
                               {ROLES.map(role => (
-                                <DropdownMenuItem 
+                                <DropdownMenuItem
                                   key={role.value}
                                   onClick={() => updateUserMutation.mutate({ id: u.id, data: { role: role.value } })}
                                   className={u.role === role.value ? 'bg-white/10' : ''}
@@ -336,11 +347,11 @@ export default function AdminUsers() {
                                   {u.role === role.value && <CheckCircle className="w-4 h-4 ml-auto text-green-400" />}
                                 </DropdownMenuItem>
                               ))}
-                              
+
                               <DropdownMenuSeparator />
                               <DropdownMenuLabel className="text-xs text-slate-500">Subscription</DropdownMenuLabel>
-                              
-                              <DropdownMenuItem 
+
+                              <DropdownMenuItem
                                 onClick={() => updateUserMutation.mutate({ id: u.id, data: { subscription_status: 'active' } })}
                                 className={u.subscription_status === 'active' ? 'bg-white/10' : ''}
                               >
@@ -348,8 +359,8 @@ export default function AdminUsers() {
                                 Grant Premium
                                 {u.subscription_status === 'active' && <CheckCircle className="w-4 h-4 ml-auto text-green-400" />}
                               </DropdownMenuItem>
-                              
-                              <DropdownMenuItem 
+
+                              <DropdownMenuItem
                                 onClick={() => updateUserMutation.mutate({ id: u.id, data: { subscription_status: 'none' } })}
                                 className={(!u.subscription_status || u.subscription_status === 'none') ? 'bg-white/10' : ''}
                               >
@@ -360,24 +371,24 @@ export default function AdminUsers() {
 
                               <DropdownMenuSeparator />
                               <DropdownMenuLabel className="text-xs text-slate-500">Account Status</DropdownMenuLabel>
-                              
-                              <DropdownMenuItem 
+
+                              <DropdownMenuItem
                                 onClick={() => updateUserMutation.mutate({ id: u.id, data: { account_status: 'active' } })}
                                 className={(!u.account_status || u.account_status === 'active') ? 'bg-white/10' : ''}
                               >
                                 <CheckCircle className="w-4 h-4 mr-2 text-green-400" />
                                 Active
                               </DropdownMenuItem>
-                              
-                              <DropdownMenuItem 
+
+                              <DropdownMenuItem
                                 onClick={() => updateUserMutation.mutate({ id: u.id, data: { account_status: 'suspended' } })}
                                 className={u.account_status === 'suspended' ? 'bg-white/10' : ''}
                               >
                                 <AlertTriangle className="w-4 h-4 mr-2 text-amber-400" />
                                 Suspend
                               </DropdownMenuItem>
-                              
-                              <DropdownMenuItem 
+
+                              <DropdownMenuItem
                                 onClick={() => updateUserMutation.mutate({ id: u.id, data: { account_status: 'banned' } })}
                                 className={u.account_status === 'banned' ? 'bg-white/10' : ''}
                               >

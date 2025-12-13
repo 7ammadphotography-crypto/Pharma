@@ -43,7 +43,7 @@ const createSupabaseEntity = (entityName) => {
       const { data, error } = await supabase.from(tableName).select('*');
       if (error) {
         console.warn(`[SupabaseAdapter] List error for ${tableName}:`, error);
-        return [];
+        throw error;
       }
       return data;
     },
