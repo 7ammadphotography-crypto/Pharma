@@ -80,7 +80,7 @@ export default function ManageTopics() {
 
   // Mutations
   const createMutation = useMutation({
-    mutationFn: (data) => base44.entities.Topic.create(data),
+    mutationFn: (data) => base44.entities.Topic.create({ ...data, name: data.title }),
     onSuccess: () => {
       queryClient.invalidateQueries(['topics']);
       resetForm();
@@ -93,7 +93,7 @@ export default function ManageTopics() {
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }) => base44.entities.Topic.update(id, data),
+    mutationFn: ({ id, data }) => base44.entities.Topic.update(id, { ...data, name: data.title }),
     onSuccess: () => {
       queryClient.invalidateQueries(['topics']);
       resetForm();

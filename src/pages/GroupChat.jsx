@@ -383,6 +383,7 @@ export default function GroupChat() {
 
     const newMessage = {
       content: message,
+      user_id: user.id, // Legacy compatibility
       user_name: user.full_name || user.email,
       user_email: user.email,
       is_question: isQuestion,

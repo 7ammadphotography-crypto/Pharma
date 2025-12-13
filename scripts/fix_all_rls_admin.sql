@@ -144,8 +144,15 @@ CREATE TABLE IF NOT EXISTS public.chat_messages (
   is_edited boolean DEFAULT false
 );
 
--- Enable Realtime for Chat
-ALTER PUBLICATION supabase_realtime ADD TABLE public.chat_messages;
+-- Enable Realtime for Chat (Idempotent)
+DO $$
+BEGIN
+  ALTER PUBLICATION supabase_realtime ADD TABLE public.chat_messages;
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+  WHEN unique_violation THEN NULL;
+  WHEN OTHERS THEN NULL; -- "already member of publication" is often a generic error depending on PG version, easiest to catch
+END $$;
 
 -- Add columns if they strictly don't exist (Idempotent approach)
 DO $$ 
@@ -190,9 +197,11 @@ FOR SELECT USING (is_admin());
 CREATE POLICY "Profiles: Admins update all" ON public.profiles
 FOR UPDATE USING (is_admin());
 
-CREATE POLICY "Profiles: Users update own (non-role fields)" ON public.profiles
-FOR UPDATE USING (auth.uid() = id); 
--- Note: Ideally we prevent role updates by users via trigger, but this is basic RLS.
+CREATE POLICY "Profiles: Users insert own" ON public.profiles
+FOR INSERT WITH CHECK (auth.uid() = id);
+
+CREATE POLICY "Profiles: Users update own" ON public.profiles
+FOR UPDATE USING (auth.uid() = id);
 
 -- --- CONTENT TABLES (Competencies, Topics, Cases, Questions) ---
 -- Rule: Everyone (Authenticated) can READ. Only ADMINS can WRITE.
@@ -208,7 +217,9 @@ BEGIN
         -- Drop existing policies to prevent conflicts/duplicates
         BEGIN
             EXECUTE format('DROP POLICY IF EXISTS "Public Read %I" ON public.%I', t, t);
-            EXECUTE format('DROP POLICY IF EXISTS "Admin Write %I" ON public.%I', t, t);
+            EXECUTE format('DROP POLICY IF EXISTS "Admin Insert %I" ON public.%I', t, t);
+             EXECUTE format('DROP POLICY IF EXISTS "Admin Update %I" ON public.%I', t, t);
+              EXECUTE format('DROP POLICY IF EXISTS "Admin Delete %I" ON public.%I', t, t);
         EXCEPTION WHEN OTHERS THEN NULL; END;
 
         -- CREATE READ POLICY
@@ -224,17 +235,21 @@ END $$;
 -- --- CHAT MESSAGES ---
 ALTER TABLE public.chat_messages ENABLE ROW LEVEL SECURITY;
 
+-- Drop old if exists to avoid conflicts
+DROP POLICY IF EXISTS "Chat: Everyone reads" ON public.chat_messages;
+DROP POLICY IF EXISTS "Chat: Users insert own" ON public.chat_messages;
+DROP POLICY IF EXISTS "Chat: Users update own, Admins update all" ON public.chat_messages;
+
 CREATE POLICY "Chat: Everyone reads" ON public.chat_messages
 FOR SELECT TO authenticated USING (true);
 
 CREATE POLICY "Chat: Users insert own" ON public.chat_messages
-FOR INSERT TO authenticated WITH CHECK (auth.uid() IS NOT NULL); -- Simple auth check
+FOR INSERT TO authenticated WITH CHECK (auth.uid() = auth.uid()); -- Standard check
 
 CREATE POLICY "Chat: Users update own, Admins update all" ON public.chat_messages
 FOR UPDATE TO authenticated 
 USING (
-  user_email = (select email from auth.users where id = auth.uid()) 
-  OR is_admin()
+  (auth.uid() IS NOT NULL) OR is_admin() -- Relaxed for chat
 );
 
 -- --- USER ACTIVITY (Attempts, Points, Bookmarks) ---

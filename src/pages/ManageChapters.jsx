@@ -64,7 +64,7 @@ export default function ManageChapters() {
   const getTopicsForChapter = (chapterId) => topics.filter(t => t.competency_id === chapterId);
 
   const createMutation = useMutation({
-    mutationFn: (data) => base44.entities.Competency.create(data),
+    mutationFn: (data) => base44.entities.Competency.create({ ...data, name: data.title }),
     onSuccess: () => {
       queryClient.invalidateQueries(['competencies']);
       resetForm();
@@ -77,7 +77,7 @@ export default function ManageChapters() {
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }) => base44.entities.Competency.update(id, data),
+    mutationFn: ({ id, data }) => base44.entities.Competency.update(id, { ...data, name: data.title }),
     onSuccess: () => {
       queryClient.invalidateQueries(['competencies']);
       resetForm();
