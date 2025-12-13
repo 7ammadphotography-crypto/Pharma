@@ -19,7 +19,22 @@ export default function ChatMessageItem({ message, currentUser, onReply, onEdit,
   const [showReactions, setShowReactions] = useState(false);
 
   const isMyMessage = currentUser?.email === message.user_email;
-  // ... (keep logic up to return)
+
+  const getBorderRadius = () => {
+    const base = "rounded-2xl";
+    if (groupPosition === 'single') return base;
+
+    if (isMyMessage) {
+      if (groupPosition === 'start') return "rounded-2xl rounded-br-sm";
+      if (groupPosition === 'middle') return "rounded-2xl rounded-r-sm";
+      if (groupPosition === 'end') return "rounded-2xl rounded-tr-sm";
+    } else {
+      if (groupPosition === 'start') return "rounded-2xl rounded-bl-sm";
+      if (groupPosition === 'middle') return "rounded-2xl rounded-l-sm";
+      if (groupPosition === 'end') return "rounded-2xl rounded-tl-sm";
+    }
+    return base;
+  };
 
   const handleUserClick = (e) => {
     e.stopPropagation();

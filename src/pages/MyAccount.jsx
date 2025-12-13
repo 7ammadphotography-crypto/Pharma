@@ -179,13 +179,20 @@ export default function MyAccount() {
 
                     const toastId = toast.loading('Uploading avatar...');
                     try {
-                      const { data } = await base44.integrations.Core.UploadFile({ file });
-                      if (data?.file_url) {
-                        await base44.auth.updateMe({ avatar_url: data.file_url });
-                        setUser(prev => ({ ...prev, avatar_url: data.file_url }));
+                      // Use the working storage API
+                      const result = await base44.storage.upload({ file, bucket: 'avatars' });
+
+                      if (result?.file_url) {
+                        // Update profile in DB
+                        const { error } = await base44.entities.User.update(user.id, { avatar_url: result.file_url });
+                        if (error) throw error;
+
+                        // Update local state
+                        setUser(prev => ({ ...prev, avatar_url: result.file_url }));
                         toast.success('Profile picture updated', { id: toastId });
                       }
                     } catch (err) {
+                      console.error(err);
                       toast.error('Failed to upload image', { id: toastId });
                     }
                   }}
