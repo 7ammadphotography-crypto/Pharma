@@ -61,7 +61,7 @@ export default function GroupChat() {
         } else if (window.location.hostname === 'localhost') {
           // Dev Fallback
           setUser({
-            id: 'dev-user',
+            id: '00000000-0000-0000-0000-000000000000', // Must be valid UUID
             email: 'dev@example.com',
             full_name: 'Developer',
             role: 'admin'
@@ -70,9 +70,9 @@ export default function GroupChat() {
       } catch (error) {
         console.error("Auth error", error);
         if (window.location.hostname === 'localhost') {
-          // Dev Fallback on error
+          // Dev Fallback
           setUser({
-            id: 'dev-user',
+            id: '00000000-0000-0000-0000-000000000000', // Must be valid UUID
             email: 'dev@example.com',
             full_name: 'Developer',
             role: 'admin'
@@ -86,11 +86,9 @@ export default function GroupChat() {
   const { data: messages = [], isLoading } = useQuery({
     queryKey: ['chatStats'],
     queryFn: async () => {
-      const response = await base44.integrations.Core.ListRows({
-        model_name: 'chat_messages',
-        limit: 100
-      });
-      return response.data || [];
+      // Use the working entity API instead of non-existent Core.ListRows
+      const data = await base44.entities.ChatMessage.list();
+      return data || [];
     },
     refetchInterval: 3000
   });

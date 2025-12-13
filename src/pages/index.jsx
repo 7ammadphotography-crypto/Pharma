@@ -1,11 +1,7 @@
 import Layout from "./Layout.jsx";
-
 import Home from "./Home";
-
 import Questions from "./Questions";
-
 import Dashboard from "./Dashboard";
-
 import AIAssistant from "./AIAssistant";
 
 import Profile from "./Profile";
@@ -76,6 +72,7 @@ import AdminChatManagement from "./AdminChatManagement";
 
 import MyAccount from "./MyAccount";
 import Login from "./Login";
+import Diagnostic from "./Diagnostic";
 import ProtectedRoute from "@/components/ProtectedRoute";
 
 import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
@@ -183,6 +180,7 @@ function PagesContent() {
             <Routes>
                 {/* Public Route */}
                 <Route path="/login" element={<Login />} />
+                <Route path="/diagnostic" element={<Diagnostic />} />
 
                 {/* Protected Routes */}
                 <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
