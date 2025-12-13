@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { supabase } from '@/lib/supabaseClient';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import { Card } from "@/components/ui/card";
@@ -179,25 +180,37 @@ export default function MyAccount() {
 
                     const toastId = toast.loading('Uploading avatar...');
                     try {
-                      // 1. Upload
-                      const result = await base44.storage.upload({ file, bucket: 'avatars' });
+                      const fileName = `${user.id}-${Date.now()}.${file.name.split('.').pop()}`;
 
-                      if (result?.file_url) {
-                        // 2. Update DB
-                        const { error } = await base44.entities.User.update(user.id, { avatar_url: result.file_url });
+                      // 1. Direct Supabase Upload
+                      const { data: uploadData, error: uploadError } = await supabase.storage
+                        .from('avatars')
+                        .upload(fileName, file, { upsert: true });
 
-                        if (error) {
-                          console.error("DB Update Error:", error);
-                          throw new Error(`Profile update failed: ${error.message}`);
-                        }
-
-                        setUser(prev => ({ ...prev, avatar_url: result.file_url }));
-                        toast.success('Profile picture updated', { id: toastId });
+                      if (uploadError) {
+                        console.error('Supabase Upload Error:', uploadError);
+                        throw new Error(`Upload failed: ${uploadError.message}`);
                       }
+
+                      // 2. Get Public URL
+                      const { data: { publicUrl } } = supabase.storage
+                        .from('avatars')
+                        .getPublicUrl(fileName);
+
+                      // 3. Update DB
+                      const { error: dbError } = await base44.entities.User.update(user.id, { avatar_url: publicUrl });
+
+                      if (dbError) {
+                        console.error('DB Update Error:', dbError);
+                        throw new Error(`Profile save failed: ${dbError.message}`);
+                      }
+
+                      setUser(prev => ({ ...prev, avatar_url: publicUrl }));
+                      toast.success('Profile picture updated', { id: toastId });
+
                     } catch (err) {
-                      console.error("Upload Flow Error:", err);
-                      // Show exact error to user
-                      toast.error(err.message || 'Failed to upload image', { id: toastId });
+                      console.error("Full Error:", err);
+                      toast.error(err.message, { id: toastId, duration: 5000 });
                     }
                   }}
                 />
