@@ -2,6 +2,7 @@ import { supabase } from '@/lib/supabaseClient';
 
 // Helper to map entity names to table names
 const TABLE_MAP = {
+  'User': 'profiles', // Explicit mapping for AdminUsers
   'Profile': 'profiles',
   'Competency': 'competencies',
   'Topic': 'topics',

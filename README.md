@@ -1,20 +1,31 @@
-# Base44 App
+# Pharma Target
 
+An intelligent, gamified learning platform for pharmacy students.
 
-This app was created automatically by Base44.
-It's a Vite+React app that communicates with the Base44 API.
+## Quick Start
 
-## Running the app
+1.  **Install Dependencies**
+    ```bash
+    npm install
+    ```
 
-```bash
-npm install
-npm run dev
-```
+2.  **Environment Setup**
+    Associate your project with Vercel or create a `.env` file with:
+    - `VITE_SUPABASE_URL`
+    - `VITE_SUPABASE_ANON_KEY`
+    - `SUPABASE_SERVICE_ROLE_KEY` (Only for local seeding)
 
-## Building the app
+3.  **Database Seeding**
+    To populate the database with initial Categories, Topics, and Questions:
+    ```bash
+    npm run seed
+    ```
 
-```bash
-npm run build
-```
+4.  **Development**
+    ```bash
+    npm run dev
+    ```
 
-For more information and support, please contact Base44 support at app@base44.com.
+## Admin Features
+- Navigate to `/admin` (Must have `role: 'admin'` in `profiles` table).
+- Manage Users, Chapters, Topics, Cases, and Questions.
