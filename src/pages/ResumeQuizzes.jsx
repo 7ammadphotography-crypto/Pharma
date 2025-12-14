@@ -20,7 +20,7 @@ export default function ResumeQuizzes() {
     queryFn: () => base44.entities.QuizAttempt.filter({
       user_id: user?.id,
       is_completed: false
-    }, '-created_date'),
+    }, '-created_at'),
     enabled: !!user
   });
 

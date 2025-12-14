@@ -59,7 +59,7 @@ export default function MyAccount() {
 
   const { data: attempts = [], isLoading: attemptsLoading } = useQuery({
     queryKey: ['user-attempts', user?.id],
-    queryFn: () => base44.entities.QuizAttempt.filter({ user_id: user?.id }, '-created_date'),
+    queryFn: () => base44.entities.QuizAttempt.filter({ user_id: user?.id }, '-created_at'),
     enabled: !!user?.id
   });
 

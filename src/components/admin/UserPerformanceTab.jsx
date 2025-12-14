@@ -70,7 +70,7 @@ export default function UserPerformanceTab({ user }) {
             allIncorrectAnswers.push({
               ...answer,
               question,
-              attemptDate: attempt.created_date
+              attemptDate: attempt.created_at
             });
           }
         }
@@ -89,7 +89,7 @@ export default function UserPerformanceTab({ user }) {
             allCorrectAnswers.push({
               ...answer,
               question,
-              attemptDate: attempt.created_date
+              attemptDate: attempt.created_at
             });
           }
         }
@@ -310,10 +310,10 @@ export default function UserPerformanceTab({ user }) {
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
                             <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${attempt.percentage >= 80 ? 'bg-green-500/20' :
-                                attempt.percentage >= 50 ? 'bg-amber-500/20' : 'bg-red-500/20'
+                              attempt.percentage >= 50 ? 'bg-amber-500/20' : 'bg-red-500/20'
                               }`}>
                               <span className={`font-bold ${attempt.percentage >= 80 ? 'text-green-400' :
-                                  attempt.percentage >= 50 ? 'text-amber-400' : 'text-red-400'
+                                attempt.percentage >= 50 ? 'text-amber-400' : 'text-red-400'
                                 }`}>
                                 {attempt.percentage || 0}%
                               </span>
@@ -331,7 +331,7 @@ export default function UserPerformanceTab({ user }) {
                           </div>
                           <div className="flex items-center gap-2">
                             <span className="text-xs text-slate-500">
-                              {formatDistanceToNow(new Date(attempt.created_date), { addSuffix: true })}
+                              {formatDistanceToNow(new Date(attempt.created_at), { addSuffix: true })}
                             </span>
                             {isExpanded ? (
                               <ChevronUp className="w-4 h-4 text-slate-400" />
@@ -354,8 +354,8 @@ export default function UserPerformanceTab({ user }) {
                                 <div
                                   key={idx}
                                   className={`p-2 rounded-lg text-xs ${answer.is_correct
-                                      ? 'bg-green-500/10 border border-green-500/20'
-                                      : 'bg-red-500/10 border border-red-500/20'
+                                    ? 'bg-green-500/10 border border-green-500/20'
+                                    : 'bg-red-500/10 border border-red-500/20'
                                     }`}
                                 >
                                   <p className="text-white mb-1">{question.question_text}</p>
@@ -398,7 +398,7 @@ export default function UserPerformanceTab({ user }) {
         <div className="grid grid-cols-2 gap-4 text-sm">
           <div>
             <span className="text-slate-400">Account Created</span>
-            <p className="text-white">{format(new Date(user.created_date), 'MMM d, yyyy')}</p>
+            <p className="text-white">{format(new Date(user.created_at), 'MMM d, yyyy')}</p>
           </div>
           <div>
             <span className="text-slate-400">Last Login</span>
@@ -414,7 +414,7 @@ export default function UserPerformanceTab({ user }) {
               {userPoints?.last_activity_date
                 ? formatDistanceToNow(new Date(userPoints.last_activity_date), { addSuffix: true })
                 : attempts.length > 0
-                  ? formatDistanceToNow(new Date(attempts[0].created_date), { addSuffix: true })
+                  ? formatDistanceToNow(new Date(attempts[0].created_at), { addSuffix: true })
                   : 'N/A'}
             </p>
           </div>
