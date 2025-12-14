@@ -93,32 +93,18 @@ export default function GroupChat() {
     refetchInterval: 3000
   });
 
-  const { data: typingIndicators = [] } = useQuery({
-    queryKey: ['typingIndicators'],
-    queryFn: async () => {
-      try {
-        const response = await base44.integrations.Core.ListRows({
-          model_name: 'chat_typing',
-          limit: 20
-        });
-        const now = moment();
-        return (response.data || []).filter(ind =>
-          moment(ind.updated_at).isAfter(now.subtract(5, 'seconds'))
-        );
-      } catch {
-        return [];
-      }
-    },
-    refetchInterval: 2000
-  });
+  // Typing indicators temporarily disabled to prevent Core dependency crash
+  const typingIndicators = [];
 
   const { data: allUsers = [] } = useQuery({
     queryKey: ['users'],
     queryFn: async () => {
       try {
-        const response = await base44.integrations.Core.ListUsers();
-        return response.data;
-      } catch {
+        // Use the entity API
+        const data = await base44.entities.User.list();
+        return data || [];
+      } catch (err) {
+        console.warn("Failed to load users for mention:", err);
         return [];
       }
     }
@@ -126,15 +112,8 @@ export default function GroupChat() {
 
   const updateTypingMutation = useMutation({
     mutationFn: async () => {
-      if (!user) return;
-      await base44.integrations.Core.CreateRow({
-        model_name: "chat_typing",
-        data: {
-          user_email: user.email,
-          user_name: user.full_name || user.email,
-          timestamp: new Date().toISOString()
-        }
-      });
+      // Disabled typing indicators
+      return Promise.resolve();
     }
   });
 
