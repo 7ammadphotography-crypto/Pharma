@@ -141,6 +141,20 @@ const supabaseAdapter = {
     },
     logout: async () => {
       await supabase.auth.signOut();
+    },
+    updateMe: async (updates) => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error("Not authenticated");
+
+      const { data, error } = await supabase
+        .from('profiles')
+        .update(updates)
+        .eq('id', session.user.id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
     }
   },
   storage: {

@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Trophy, Medal, Star, Crown, Award, Zap, Flame, Target, Brain, Rocket, Shield, Heart, Sparkles, Gem, Lock } from 'lucide-react';
 import { motion } from 'framer-motion';
 import SubscriptionGuard from '@/components/SubscriptionGuard';
+import { fetchUserAnalytics } from '@/utils/analytics';
 
 export default function Badges() {
   const [user, setUser] = useState(null);
@@ -20,24 +21,16 @@ export default function Badges() {
   });
 
   const { data: userBadges = [] } = useQuery({
-    queryKey: ['user-badges', user?.email],
+    queryKey: ['user-badges', user?.id],
     queryFn: () => base44.entities.UserBadge.filter({ user_id: user?.id }),
     enabled: !!user
   });
 
-  const { data: attempts = [] } = useQuery({
-    queryKey: ['user-attempts', user?.email],
-    queryFn: () => base44.entities.QuizAttempt.filter({ user_id: user?.id }),
-    enabled: !!user
-  });
-
-  const { data: userPoints } = useQuery({
-    queryKey: ['user-points', user?.email],
-    queryFn: async () => {
-      const points = await base44.entities.UserPoints.filter({ user_id: user?.id });
-      return points[0];
-    },
-    enabled: !!user
+  // Use unified analytics
+  const { data: analytics } = useQuery({
+    queryKey: ['user-analytics', user?.id],
+    queryFn: () => fetchUserAnalytics(user?.id),
+    enabled: !!user?.id
   });
 
   const getIconComponent = (iconName) => {
@@ -85,40 +78,23 @@ export default function Badges() {
     return colors[rarity] || colors.common;
   };
 
-  const checkBadgeProgress = (badge) => {
-    const completedAttempts = attempts.filter(a => a.is_completed);
+  const checkBadgeProgress = (badge, stats) => {
+    if (!stats) return 0;
 
-    switch (badge.requirement_type) {
-      case 'quizzes_completed':
-        return completedAttempts.length;
-      case 'topics_mastered':
-        const topicMastery = {};
-        completedAttempts.forEach(attempt => {
-          if (attempt.topic_id) {
-            if (!topicMastery[attempt.topic_id]) {
-              topicMastery[attempt.topic_id] = [];
-            }
-            topicMastery[attempt.topic_id].push(attempt.percentage || 0);
-          }
-        });
-        return Object.entries(topicMastery).filter(([_, scores]) => {
-          const avg = scores.reduce((a, b) => a + b, 0) / scores.length;
-          return avg >= 80;
-        }).length;
-      case 'perfect_score':
-        return completedAttempts.filter(a => a.percentage === 100).length;
-      case 'study_streak':
-        return userPoints?.streak_days || 0;
-      case 'total_points':
-        return userPoints?.total_points || 0;
-      case 'avg_score':
-        if (completedAttempts.length === 0) return 0;
-        return Math.round(
-          completedAttempts.reduce((sum, a) => sum + (a.percentage || 0), 0) / completedAttempts.length
-        );
-      default:
-        return 0;
-    }
+    // Map badge requirement types to analytics properties
+    // This allows backend/admin to define new badges without code changes if they map to these keys
+    const mapping = {
+      'quizzes_completed': stats.total_quizzes,
+      'topics_mastered': stats.topics_mastered,
+      'perfect_score': stats.perfect_scores,
+      'study_streak': stats.streak_days,
+      'total_points': stats.total_points,
+      'avg_score': stats.avg_score,
+      'messages_sent': stats.messages_sent,
+      'questions_answered': stats.total_questions_answered
+    };
+
+    return mapping[badge.requirement_type] || 0;
   };
 
   const isUnlocked = (badgeId) => userBadges.some(ub => ub.badge_id === badgeId);
@@ -233,7 +209,7 @@ export default function Badges() {
             <div className="grid grid-cols-2 gap-3">
               {lockedBadges.map((badge, idx) => {
                 const Icon = getIconComponent(badge.icon);
-                const progress = checkBadgeProgress(badge);
+                const progress = checkBadgeProgress(badge, analytics);
                 const percentage = Math.min(100, Math.round((progress / badge.requirement_value) * 100));
 
                 return (
