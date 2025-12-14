@@ -56,9 +56,9 @@ export default function AdminUsers() {
     }
   });
 
-  const getUserStats = (email) => {
-    const userAttempts = attempts.filter(a => a.created_by === email);
-    const userPoints = points.find(p => p.created_by === email);
+  const getUserStats = (userId) => {
+    const userAttempts = attempts.filter(a => a.user_id === userId);
+    const userPoints = points.find(p => p.user_id === userId);
     const completed = userAttempts.filter(a => a.is_completed);
 
     const avgScore = completed.length > 0
@@ -101,10 +101,10 @@ export default function AdminUsers() {
   const premiumUsers = users.filter(u => u.subscription_status === 'active').length;
   const adminUsers = users.filter(u => u.role === 'admin').length;
   const activeToday = users.filter(u => {
-    const lastActivity = attempts.find(a => a.created_by === u.email);
+    const lastActivity = attempts.find(a => a.user_id === u.id);
     if (!lastActivity) return false;
     const today = new Date().toDateString();
-    return new Date(lastActivity.created_date).toDateString() === today;
+    return new Date(lastActivity.created_at).toDateString() === today;
   }).length;
 
   return (
@@ -253,7 +253,7 @@ export default function AdminUsers() {
                 </TableRow>
               ) : (
                 filteredUsers.map(u => {
-                  const stats = getUserStats(u.email);
+                  const stats = getUserStats(u.id);
                   const roleConfig = ROLES.find(r => r.value === u.role) || ROLES[0];
                   const RoleIcon = roleConfig.icon;
 

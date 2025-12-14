@@ -11,12 +11,12 @@ export default function Bookmarked() {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    base44.auth.me().then(setUser).catch(() => {});
+    base44.auth.me().then(setUser).catch(() => { });
   }, []);
 
   const { data: bookmarks = [], isLoading: loadingBookmarks } = useQuery({
     queryKey: ['bookmarks', user?.email],
-    queryFn: () => base44.entities.BookmarkedQuestion.filter({ created_by: user?.email }),
+    queryFn: () => base44.entities.BookmarkedQuestion.filter({ user_id: user?.id }),
     enabled: !!user
   });
 
@@ -25,7 +25,7 @@ export default function Bookmarked() {
     queryFn: () => base44.entities.Question.list()
   });
 
-  const bookmarkedQuestions = questions.filter(q => 
+  const bookmarkedQuestions = questions.filter(q =>
     bookmarks.some(b => b.question_id === q.id)
   );
 

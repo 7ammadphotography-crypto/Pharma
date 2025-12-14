@@ -12,14 +12,14 @@ export default function ResumeQuizzes() {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    base44.auth.me().then(setUser).catch(() => {});
+    base44.auth.me().then(setUser).catch(() => { });
   }, []);
 
   const { data: attempts = [], isLoading } = useQuery({
     queryKey: ['incomplete-attempts', user?.email],
-    queryFn: () => base44.entities.QuizAttempt.filter({ 
-      created_by: user?.email,
-      is_completed: false 
+    queryFn: () => base44.entities.QuizAttempt.filter({
+      user_id: user?.id,
+      is_completed: false
     }, '-created_date'),
     enabled: !!user
   });
@@ -47,8 +47,8 @@ export default function ResumeQuizzes() {
       {attempts.length > 0 ? (
         <div className="space-y-3">
           {attempts.map((attempt) => (
-            <Link 
-              key={attempt.id} 
+            <Link
+              key={attempt.id}
               to={createPageUrl(`Quiz?competencyId=${attempt.competency_id}&mode=${attempt.mode === 'mock_test' ? 'mock' : 'study'}`)}
             >
               <Card className="bg-zinc-900 border-zinc-800 p-4 hover:bg-zinc-800/50 transition-colors">

@@ -27,14 +27,14 @@ export default function Leaderboard() {
 
   const { data: allAttempts = [] } = useQuery({
     queryKey: ['all-attempts'],
-    queryFn: () => base44.entities.QuizAttempt.list('-created_date', 1000),
+    queryFn: () => base44.entities.QuizAttempt.list('-created_at', 1000),
     enabled: activeTab === 'scores'
   });
 
   // Points Leaderboard
   const pointsLeaderboard = userPoints
     .map(up => {
-      const userData = users.find(u => u.email === up.created_by);
+      const userData = users.find(u => u.id === up.user_id);
       return {
         ...up,
         name: userData?.full_name || 'Unknown',

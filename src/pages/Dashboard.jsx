@@ -15,12 +15,12 @@ export default function Dashboard() {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    base44.auth.me().then(setUser).catch(() => {});
+    base44.auth.me().then(setUser).catch(() => { });
   }, []);
 
   const { data: attempts = [], isLoading } = useQuery({
     queryKey: ['user-attempts', user?.email],
-    queryFn: () => base44.entities.QuizAttempt.filter({ created_by: user?.email }, '-created_date'),
+    queryFn: () => base44.entities.QuizAttempt.filter({ user_id: user?.id }, '-created_at'),
     enabled: !!user
   });
 
@@ -32,7 +32,7 @@ export default function Dashboard() {
   const { data: userPoints } = useQuery({
     queryKey: ['user-points', user?.email],
     queryFn: async () => {
-      const points = await base44.entities.UserPoints.filter({ created_by: user?.email });
+      const points = await base44.entities.UserPoints.filter({ user_id: user?.id });
       return points[0];
     },
     enabled: !!user
@@ -40,7 +40,7 @@ export default function Dashboard() {
 
   const completedAttempts = attempts.filter(a => a.is_completed);
   const totalStudyTime = attempts.reduce((sum, a) => sum + (a.time_spent_seconds || 0), 0);
-  const avgScore = completedAttempts.length > 0 
+  const avgScore = completedAttempts.length > 0
     ? Math.round(completedAttempts.reduce((sum, a) => sum + (a.percentage || 0), 0) / completedAttempts.length)
     : 0;
 
@@ -87,7 +87,7 @@ export default function Dashboard() {
   return (
     <div className="p-4 space-y-5 pb-28">
       {/* Header */}
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         className="flex items-center justify-between pt-2"
@@ -181,13 +181,12 @@ export default function Dashboard() {
             </div>
             <div className="flex justify-center gap-1 mt-2">
               {[...Array(7)].map((_, i) => (
-                <div 
-                  key={i} 
-                  className={`w-3 h-3 rounded-full ${
-                    i < (userPoints?.streak_days || 0) % 7 
-                      ? 'bg-orange-500' 
+                <div
+                  key={i}
+                  className={`w-3 h-3 rounded-full ${i < (userPoints?.streak_days || 0) % 7
+                      ? 'bg-orange-500'
                       : 'bg-slate-700'
-                  }`}
+                    }`}
                 />
               ))}
             </div>
@@ -219,18 +218,17 @@ export default function Dashboard() {
           {attempts.length > 0 ? (
             <div className="divide-y divide-slate-800/30">
               {attempts.slice(0, 5).map((attempt, idx) => (
-                <div 
-                  key={idx} 
+                <div
+                  key={idx}
                   className="flex items-center justify-between p-3.5 hover:bg-white/5 transition-colors"
                 >
                   <div className="flex items-center gap-3">
-                    <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${
-                      (attempt.percentage || 0) >= 80 
+                    <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${(attempt.percentage || 0) >= 80
                         ? 'bg-emerald-500/20 text-emerald-400'
                         : (attempt.percentage || 0) >= 60
-                        ? 'bg-amber-500/20 text-amber-400'
-                        : 'bg-rose-500/20 text-rose-400'
-                    }`}>
+                          ? 'bg-amber-500/20 text-amber-400'
+                          : 'bg-rose-500/20 text-rose-400'
+                      }`}>
                       <TrendingUp className="w-4 h-4" />
                     </div>
                     <div>
@@ -238,13 +236,12 @@ export default function Dashboard() {
                       <p className="text-slate-500 text-xs">{format(new Date(attempt.created_date), 'MMM d, h:mm a')}</p>
                     </div>
                   </div>
-                  <span className={`text-base font-bold ${
-                    (attempt.percentage || 0) >= 80 
+                  <span className={`text-base font-bold ${(attempt.percentage || 0) >= 80
                       ? 'text-emerald-400'
                       : (attempt.percentage || 0) >= 60
-                      ? 'text-amber-400'
-                      : 'text-rose-400'
-                  }`}>
+                        ? 'text-amber-400'
+                        : 'text-rose-400'
+                    }`}>
                     {attempt.percentage || 0}%
                   </span>
                 </div>

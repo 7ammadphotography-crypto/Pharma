@@ -6,8 +6,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { 
-  Clock, Target, TrendingUp, CheckCircle, XCircle, 
+import {
+  Clock, Target, TrendingUp, CheckCircle, XCircle,
   Calendar, Flame, BookOpen, ChevronDown, ChevronUp,
   Trophy, BarChart3, Timer, Brain
 } from 'lucide-react';
@@ -19,7 +19,7 @@ export default function UserPerformanceTab({ user }) {
   // Fetch user's quiz attempts
   const { data: attempts = [], isLoading: attemptsLoading } = useQuery({
     queryKey: ['user-attempts', user.email],
-    queryFn: () => base44.entities.QuizAttempt.filter({ created_by: user.email }, '-created_date'),
+    queryFn: () => base44.entities.QuizAttempt.filter({ user_id: user.id }, '-created_at'),
     enabled: !!user.email
   });
 
@@ -27,7 +27,7 @@ export default function UserPerformanceTab({ user }) {
   const { data: userPoints } = useQuery({
     queryKey: ['user-points', user.email],
     queryFn: async () => {
-      const points = await base44.entities.UserPoints.filter({ created_by: user.email });
+      const points = await base44.entities.UserPoints.filter({ user_id: user.id });
       return points[0] || null;
     },
     enabled: !!user.email
@@ -55,7 +55,7 @@ export default function UserPerformanceTab({ user }) {
   const totalStudyTime = attempts.reduce((sum, a) => sum + (a.time_spent_seconds || 0), 0);
   const totalQuestions = completedAttempts.reduce((sum, a) => sum + (a.total_questions || 0), 0);
   const totalCorrect = completedAttempts.reduce((sum, a) => sum + (a.score || 0), 0);
-  const avgScore = completedAttempts.length > 0 
+  const avgScore = completedAttempts.length > 0
     ? Math.round(completedAttempts.reduce((sum, a) => sum + (a.percentage || 0), 0) / completedAttempts.length)
     : 0;
 
@@ -166,7 +166,7 @@ export default function UserPerformanceTab({ user }) {
               <span className="text-red-400">Incorrect: {totalQuestions - totalCorrect}</span>
             </div>
             <div className="h-3 bg-zinc-700 rounded-full overflow-hidden">
-              <div 
+              <div
                 className="h-full bg-gradient-to-r from-green-500 to-green-400 rounded-full"
                 style={{ width: `${totalQuestions > 0 ? (totalCorrect / totalQuestions) * 100 : 0}%` }}
               />
@@ -216,7 +216,7 @@ export default function UserPerformanceTab({ user }) {
                         {format(new Date(item.attemptDate), 'MMM d')}
                       </Badge>
                     </div>
-                    
+
                     <div className="space-y-2 text-sm">
                       <div className="flex items-start gap-2 p-2 bg-red-500/10 rounded-lg border border-red-500/20">
                         <XCircle className="w-4 h-4 text-red-400 mt-0.5 shrink-0" />
@@ -225,7 +225,7 @@ export default function UserPerformanceTab({ user }) {
                           <p className="text-white">{item.question.options?.[item.selected_answer] || 'N/A'}</p>
                         </div>
                       </div>
-                      
+
                       <div className="flex items-start gap-2 p-2 bg-green-500/10 rounded-lg border border-green-500/20">
                         <CheckCircle className="w-4 h-4 text-green-400 mt-0.5 shrink-0" />
                         <div>
@@ -300,7 +300,7 @@ export default function UserPerformanceTab({ user }) {
                   const isExpanded = expandedAttempt === attempt.id;
                   const topic = topics.find(t => t.id === attempt.topic_id);
                   const competency = competencies.find(c => c.id === attempt.competency_id);
-                  
+
                   return (
                     <Card key={attempt.id} className="bg-zinc-800/50 border-zinc-700 overflow-hidden">
                       <button
@@ -309,14 +309,12 @@ export default function UserPerformanceTab({ user }) {
                       >
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
-                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-                              attempt.percentage >= 80 ? 'bg-green-500/20' :
-                              attempt.percentage >= 50 ? 'bg-amber-500/20' : 'bg-red-500/20'
-                            }`}>
-                              <span className={`font-bold ${
-                                attempt.percentage >= 80 ? 'text-green-400' :
-                                attempt.percentage >= 50 ? 'text-amber-400' : 'text-red-400'
+                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${attempt.percentage >= 80 ? 'bg-green-500/20' :
+                                attempt.percentage >= 50 ? 'bg-amber-500/20' : 'bg-red-500/20'
                               }`}>
+                              <span className={`font-bold ${attempt.percentage >= 80 ? 'text-green-400' :
+                                  attempt.percentage >= 50 ? 'text-amber-400' : 'text-red-400'
+                                }`}>
                                 {attempt.percentage || 0}%
                               </span>
                             </div>
@@ -351,15 +349,14 @@ export default function UserPerformanceTab({ user }) {
                             {attempt.answers.map((answer, idx) => {
                               const question = getQuestionById(answer.question_id);
                               if (!question) return null;
-                              
+
                               return (
-                                <div 
+                                <div
                                   key={idx}
-                                  className={`p-2 rounded-lg text-xs ${
-                                    answer.is_correct 
-                                      ? 'bg-green-500/10 border border-green-500/20' 
+                                  className={`p-2 rounded-lg text-xs ${answer.is_correct
+                                      ? 'bg-green-500/10 border border-green-500/20'
                                       : 'bg-red-500/10 border border-red-500/20'
-                                  }`}
+                                    }`}
                                 >
                                   <p className="text-white mb-1">{question.question_text}</p>
                                   <div className="flex items-center gap-2">
@@ -406,7 +403,7 @@ export default function UserPerformanceTab({ user }) {
           <div>
             <span className="text-slate-400">Last Login</span>
             <p className="text-white">
-              {user.last_login_date 
+              {user.last_login_date
                 ? formatDistanceToNow(new Date(user.last_login_date), { addSuffix: true })
                 : 'N/A'}
             </p>
@@ -414,9 +411,9 @@ export default function UserPerformanceTab({ user }) {
           <div>
             <span className="text-slate-400">Last Activity</span>
             <p className="text-white">
-              {userPoints?.last_activity_date 
+              {userPoints?.last_activity_date
                 ? formatDistanceToNow(new Date(userPoints.last_activity_date), { addSuffix: true })
-                : attempts.length > 0 
+                : attempts.length > 0
                   ? formatDistanceToNow(new Date(attempts[0].created_date), { addSuffix: true })
                   : 'N/A'}
             </p>

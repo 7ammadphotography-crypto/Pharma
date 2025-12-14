@@ -15,12 +15,12 @@ export default function PersonalizedReview() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    base44.auth.me().then(setUser).catch(() => {});
+    base44.auth.me().then(setUser).catch(() => { });
   }, []);
 
   const { data: attempts = [] } = useQuery({
     queryKey: ['attempts', user?.email],
-    queryFn: () => base44.entities.QuizAttempt.filter({ created_by: user?.email }, '-created_date', 20),
+    queryFn: () => base44.entities.QuizAttempt.filter({ user_id: user?.id }, '-created_at', 20),
     enabled: !!user
   });
 
@@ -168,162 +168,160 @@ Keep it concise and actionable.`,
 
   return (
     <SubscriptionGuard>
-    <div className="p-4 space-y-5 pb-28">
-      {/* Header */}
-      <motion.div 
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="flex items-center gap-3"
-      >
-        <Link to={createPageUrl('Home')}>
-          <Button variant="ghost" size="icon" className="text-white hover:bg-white/10">
-            <ArrowLeft className="w-5 h-5" />
-          </Button>
-        </Link>
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center">
-            <Brain className="w-5 h-5 text-white" />
+      <div className="p-4 space-y-5 pb-28">
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex items-center gap-3"
+        >
+          <Link to={createPageUrl('Home')}>
+            <Button variant="ghost" size="icon" className="text-white hover:bg-white/10">
+              <ArrowLeft className="w-5 h-5" />
+            </Button>
+          </Link>
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center">
+              <Brain className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h1 className="text-xl font-bold text-white">AI Review</h1>
+              <p className="text-slate-500 text-xs">Personalized for you</p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-xl font-bold text-white">AI Review</h1>
-            <p className="text-slate-500 text-xs">Personalized for you</p>
-          </div>
-        </div>
-      </motion.div>
+        </motion.div>
 
-      {/* Stats */}
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ delay: 0.1 }}
-        className="grid grid-cols-3 gap-3"
-      >
-        <Card className="glass-card border-0 p-4 text-center">
-          <p className="text-2xl font-bold text-white">{review.totalAttempts}</p>
-          <p className="text-slate-500 text-xs">Quizzes</p>
-        </Card>
-        <Card className="glass-card border-0 p-4 text-center">
-          <p className="text-2xl font-bold text-white">{review.weakAreas.length}</p>
-          <p className="text-slate-500 text-xs">Weak Areas</p>
-        </Card>
-        <Card className="glass-card border-0 p-4 text-center">
-          <p className="text-2xl font-bold text-white">{review.incorrectCount}</p>
-          <p className="text-slate-500 text-xs">To Review</p>
-        </Card>
-      </motion.div>
+        {/* Stats */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.1 }}
+          className="grid grid-cols-3 gap-3"
+        >
+          <Card className="glass-card border-0 p-4 text-center">
+            <p className="text-2xl font-bold text-white">{review.totalAttempts}</p>
+            <p className="text-slate-500 text-xs">Quizzes</p>
+          </Card>
+          <Card className="glass-card border-0 p-4 text-center">
+            <p className="text-2xl font-bold text-white">{review.weakAreas.length}</p>
+            <p className="text-slate-500 text-xs">Weak Areas</p>
+          </Card>
+          <Card className="glass-card border-0 p-4 text-center">
+            <p className="text-2xl font-bold text-white">{review.incorrectCount}</p>
+            <p className="text-slate-500 text-xs">To Review</p>
+          </Card>
+        </motion.div>
 
-      {/* AI Analysis */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
-      >
-        <Card className="glass-card glow-effect border-0 p-5">
-          <div className="flex items-center gap-2 mb-3">
-            <Sparkles className="w-5 h-5 text-indigo-400" />
-            <h3 className="text-white font-semibold">AI Analysis</h3>
-          </div>
-          <p className="text-slate-300 text-sm leading-relaxed">{review.analysis}</p>
-        </Card>
-      </motion.div>
-
-      {/* Weak Areas */}
-      {review.weakAreas.length > 0 && (
+        {/* AI Analysis */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.25 }}
+          transition={{ delay: 0.2 }}
+        >
+          <Card className="glass-card glow-effect border-0 p-5">
+            <div className="flex items-center gap-2 mb-3">
+              <Sparkles className="w-5 h-5 text-indigo-400" />
+              <h3 className="text-white font-semibold">AI Analysis</h3>
+            </div>
+            <p className="text-slate-300 text-sm leading-relaxed">{review.analysis}</p>
+          </Card>
+        </motion.div>
+
+        {/* Weak Areas */}
+        {review.weakAreas.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.25 }}
+          >
+            <div className="flex items-center gap-2 mb-3">
+              <AlertCircle className="w-5 h-5 text-amber-400" />
+              <h3 className="text-white font-semibold">Focus Areas</h3>
+            </div>
+            <div className="space-y-2">
+              {review.weakAreas.slice(0, 3).map((area, idx) => (
+                <Card key={idx} className="glass-card border-0 p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-white text-sm font-medium">{area.name}</span>
+                    <span className={`text-sm font-bold ${area.percentage < 50 ? 'text-rose-400' : 'text-amber-400'
+                      }`}>{area.percentage}%</span>
+                  </div>
+                  <div className="h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                    <div
+                      className={`h-full rounded-full ${area.percentage < 50 ? 'bg-rose-500' : 'bg-amber-500'
+                        }`}
+                      style={{ width: `${area.percentage}%` }}
+                    />
+                  </div>
+                </Card>
+              ))}
+            </div>
+          </motion.div>
+        )}
+
+        {/* Recommendations */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
         >
           <div className="flex items-center gap-2 mb-3">
-            <AlertCircle className="w-5 h-5 text-amber-400" />
-            <h3 className="text-white font-semibold">Focus Areas</h3>
+            <Target className="w-5 h-5 text-emerald-400" />
+            <h3 className="text-white font-semibold">Recommendations</h3>
           </div>
-          <div className="space-y-2">
-            {review.weakAreas.slice(0, 3).map((area, idx) => (
+          <div className="space-y-3">
+            {review.recommendations?.map((rec, idx) => (
               <Card key={idx} className="glass-card border-0 p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-white text-sm font-medium">{area.name}</span>
-                  <span className={`text-sm font-bold ${
-                    area.percentage < 50 ? 'text-rose-400' : 'text-amber-400'
-                  }`}>{area.percentage}%</span>
-                </div>
-                <div className="h-1.5 bg-slate-800 rounded-full overflow-hidden">
-                  <div 
-                    className={`h-full rounded-full ${
-                      area.percentage < 50 ? 'bg-rose-500' : 'bg-amber-500'
-                    }`}
-                    style={{ width: `${area.percentage}%` }}
-                  />
+                <div className="flex items-start gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center flex-shrink-0">
+                    <span className="text-emerald-400 font-bold text-sm">{idx + 1}</span>
+                  </div>
+                  <div>
+                    <p className="text-white text-sm font-medium">{rec.title}</p>
+                    <p className="text-slate-400 text-xs mt-1">{rec.description}</p>
+                  </div>
                 </div>
               </Card>
             ))}
           </div>
         </motion.div>
-      )}
 
-      {/* Recommendations */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.3 }}
-      >
-        <div className="flex items-center gap-2 mb-3">
-          <Target className="w-5 h-5 text-emerald-400" />
-          <h3 className="text-white font-semibold">Recommendations</h3>
-        </div>
-        <div className="space-y-3">
-          {review.recommendations?.map((rec, idx) => (
-            <Card key={idx} className="glass-card border-0 p-4">
-              <div className="flex items-start gap-3">
-                <div className="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center flex-shrink-0">
-                  <span className="text-emerald-400 font-bold text-sm">{idx + 1}</span>
-                </div>
-                <div>
-                  <p className="text-white text-sm font-medium">{rec.title}</p>
-                  <p className="text-slate-400 text-xs mt-1">{rec.description}</p>
-                </div>
+        {/* Motivation */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.35 }}
+        >
+          <Card className="bg-gradient-to-r from-indigo-600/20 to-purple-600/20 border border-indigo-500/20 p-5">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-indigo-500/30 flex items-center justify-center">
+                <TrendingUp className="w-5 h-5 text-indigo-400" />
               </div>
-            </Card>
-          ))}
-        </div>
-      </motion.div>
-
-      {/* Motivation */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.35 }}
-      >
-        <Card className="bg-gradient-to-r from-indigo-600/20 to-purple-600/20 border border-indigo-500/20 p-5">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-indigo-500/30 flex items-center justify-center">
-              <TrendingUp className="w-5 h-5 text-indigo-400" />
+              <p className="text-slate-200 text-sm leading-relaxed flex-1">{review.motivation}</p>
             </div>
-            <p className="text-slate-200 text-sm leading-relaxed flex-1">{review.motivation}</p>
-          </div>
-        </Card>
-      </motion.div>
+          </Card>
+        </motion.div>
 
-      {/* Action Buttons */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.4 }}
-        className="space-y-3"
-      >
-        <Link to={createPageUrl('IncorrectAnswers')}>
-          <Button className="w-full bg-gradient-to-r from-rose-600 to-pink-600 py-5">
-            Review Mistakes
-            <ChevronRight className="w-5 h-5 ml-2" />
-          </Button>
-        </Link>
-        <Link to={createPageUrl('Questions')}>
-          <Button variant="outline" className="w-full border-slate-700 text-white hover:bg-white/5 py-5">
-            Practice More
-          </Button>
-        </Link>
-      </motion.div>
-    </div>
+        {/* Action Buttons */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+          className="space-y-3"
+        >
+          <Link to={createPageUrl('IncorrectAnswers')}>
+            <Button className="w-full bg-gradient-to-r from-rose-600 to-pink-600 py-5">
+              Review Mistakes
+              <ChevronRight className="w-5 h-5 ml-2" />
+            </Button>
+          </Link>
+          <Link to={createPageUrl('Questions')}>
+            <Button variant="outline" className="w-full border-slate-700 text-white hover:bg-white/5 py-5">
+              Practice More
+            </Button>
+          </Link>
+        </motion.div>
+      </div>
     </SubscriptionGuard>
   );
 }

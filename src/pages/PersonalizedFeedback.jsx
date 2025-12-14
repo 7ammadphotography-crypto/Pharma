@@ -23,7 +23,7 @@ export default function PersonalizedFeedback() {
 
   const { data: attempts = [] } = useQuery({
     queryKey: ['attempts', user?.email],
-    queryFn: () => base44.entities.QuizAttempt.filter({ created_by: user?.email }),
+    queryFn: () => base44.entities.QuizAttempt.filter({ user_id: user?.id }),
     enabled: !!user
   });
 

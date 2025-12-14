@@ -11,12 +11,12 @@ export default function IncorrectAnswers() {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    base44.auth.me().then(setUser).catch(() => {});
+    base44.auth.me().then(setUser).catch(() => { });
   }, []);
 
   const { data: attempts = [], isLoading } = useQuery({
     queryKey: ['user-attempts', user?.email],
-    queryFn: () => base44.entities.QuizAttempt.filter({ created_by: user?.email }, '-created_date'),
+    queryFn: () => base44.entities.QuizAttempt.filter({ user_id: user?.id }, '-created_at'),
     enabled: !!user
   });
 

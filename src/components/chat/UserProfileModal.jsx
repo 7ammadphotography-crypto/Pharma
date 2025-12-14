@@ -13,7 +13,7 @@ export default function UserProfileModal({ isOpen, onClose, user, currentUser })
         queryKey: ['user-stats', user.email],
         queryFn: async () => {
             // Fetch user points/stats
-            const points = await base44.entities.UserPoints.filter({ created_by: user.email });
+            const points = await base44.entities.UserPoints.filter({ user_id: user.id });
             return points[0] || { total_points: 0, streak_days: 0 };
         },
         enabled: !!user.email && isOpen
@@ -21,7 +21,7 @@ export default function UserProfileModal({ isOpen, onClose, user, currentUser })
 
     const { data: attempts = [] } = useQuery({
         queryKey: ['user-public-attempts', user.email],
-        queryFn: () => base44.entities.QuizAttempt.filter({ created_by: user.email }),
+        queryFn: () => base44.entities.QuizAttempt.filter({ user_id: user.id }),
         enabled: !!user.email && isOpen
     });
 
