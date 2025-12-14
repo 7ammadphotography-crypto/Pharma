@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import {
   User, Camera, Building2, Briefcase, Calendar, Settings, ChevronRight,
@@ -456,6 +456,9 @@ export default function MyAccount() {
         <DialogContent className="bg-zinc-900 border-zinc-800 max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-white text-xl">Edit Profile</DialogTitle>
+            <DialogDescription className="text-zinc-400">
+              Update your personal information and social links visible on your profile.
+            </DialogDescription>
           </DialogHeader>
           <div className="space-y-5 py-2">
             <div>

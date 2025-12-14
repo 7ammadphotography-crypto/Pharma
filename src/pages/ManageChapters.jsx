@@ -102,7 +102,7 @@ export default function ManageChapters() {
   });
 
   const createTopicMutation = useMutation({
-    mutationFn: (data) => base44.entities.Topic.create(data),
+    mutationFn: (data) => base44.entities.Topic.create({ ...data, name: data.name || data.title || 'Untitled Chapter' }),
     onSuccess: () => {
       queryClient.invalidateQueries(['topics']);
       setNewTopicForm({ title: '', description: '' });
