@@ -29,20 +29,38 @@ export const AuthProvider = ({ children }) => {
     useEffect(() => {
         // Check active session
         supabase.auth.getSession().then(async ({ data: { session } }) => {
-            setUser(session?.user ?? null);
-            if (session?.user) {
-                let p = await fetchProfile(session.user.id);
-                if (!p) {
-                    const { error } = await supabase.from('profiles').upsert({
-                        id: session.user.id,
-                        email: session.user.email,
-                        full_name: session.user.user_metadata?.full_name || 'Student',
-                        role: 'student'
-                    });
-                    if (!error) p = await fetchProfile(session.user.id);
+            console.log('[useAuth] Session check result:', session ? 'Found session' : 'No session');
+            try {
+                setUser(session?.user ?? null);
+                if (session?.user) {
+                    console.log('[useAuth] Fetching profile for:', session.user.id);
+                    let p = await fetchProfile(session.user.id);
+                    if (!p) {
+                        console.log('[useAuth] Profile not found, attempting upsert...');
+                        const { error } = await supabase.from('profiles').upsert({
+                            id: session.user.id,
+                            email: session.user.email,
+                            full_name: session.user.user_metadata?.full_name || 'Student',
+                            role: 'student'
+                        });
+                        if (!error) {
+                            console.log('[useAuth] Upsert successful, refetching...');
+                            p = await fetchProfile(session.user.id);
+                        } else {
+                            console.error('[useAuth] Upsert failed:', error);
+                        }
+                    }
+                    setProfile(p);
+                    console.log('[useAuth] Profile set:', p ? 'Success' : 'Failed');
                 }
-                setProfile(p);
+            } catch (err) {
+                console.error('[useAuth] Unexpected error during session init:', err);
+            } finally {
+                console.log('[useAuth] Setting loading to false');
+                setLoading(false);
             }
+        }).catch(err => {
+            console.error('[useAuth] getSession failed completely:', err);
             setLoading(false);
         });
 
