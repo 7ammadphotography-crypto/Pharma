@@ -665,14 +665,7 @@ export default function GroupChat() {
                     </div>
                   ) : (
                     <div className="space-y-6 pb-20">
-                      {Object.entries(
-                        filteredMessages.reduce((groups, msg) => {
-                          const date = moment(msg.created_date).format('YYYY-MM-DD');
-                          if (!groups[date]) groups[date] = [];
-                          groups[date].push(msg);
-                          return groups;
-                        }, {})
-                      ).map(([date, dateMessages]) => (
+                      {Object.entries(groupedMessages).map(([date, dateMessages]) => (
                         <div key={date} className="space-y-4">
                           <div className="sticky top-0 z-10 flex justify-center py-2 pointer-events-none">
                             <span className="bg-zinc-800/80 backdrop-blur-md text-zinc-400 text-xs font-medium px-3 py-1 rounded-full border border-white/5 shadow-sm">

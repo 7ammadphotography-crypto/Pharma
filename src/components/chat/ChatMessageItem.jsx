@@ -183,7 +183,7 @@ export default function ChatMessageItem({ message, currentUser, onReply, onEdit,
           <div className="flex items-center justify-end gap-1 mt-1 select-none">
             {message.is_edited && <span className="text-[10px] opacity-60">edited</span>}
             <span className="text-[10px] opacity-60 lowercase">
-              {moment(message.created_date).format('h:mm a')}
+              {moment(message.created_at).format('h:mm a')}
             </span>
             {isMyMessage && (
               <span className={`ml-0.5 ${hasBeenRead ? 'text-indigo-200' : 'opacity-60'}`} title={readCount > 0 ? `Read by ${readCount}` : 'Sent'}>
