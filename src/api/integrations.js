@@ -3,24 +3,30 @@ import { base44 } from './base44Client';
 
 
 
-export const Core = base44.integrations.Core;
+// Lazy access wrappers to prevent undefined errors during module initialization
+export const Core = {
+    InvokeLLM: (...args) => base44.integrations.Core.InvokeLLM(...args),
+    SendEmail: (...args) => base44.integrations.Core.SendEmail(...args),
+    UploadFile: (...args) => base44.integrations.Core.UploadFile(...args),
+    GenerateImage: (...args) => base44.integrations.Core.GenerateImage(...args),
+    ExtractDataFromUploadedFile: (...args) => base44.integrations.Core.ExtractDataFromUploadedFile(...args),
+    CreateFileSignedUrl: (...args) => base44.integrations.Core.CreateFileSignedUrl(...args),
+    UploadPrivateFile: (...args) => base44.integrations.Core.UploadPrivateFile(...args),
+};
 
-export const InvokeLLM = base44.integrations.Core.InvokeLLM;
+export const InvokeLLM = (...args) => base44.integrations.Core.InvokeLLM(...args);
 
-export const SendEmail = base44.integrations.Core.SendEmail;
+export const SendEmail = (...args) => base44.integrations.Core.SendEmail(...args);
 
-export const UploadFile = base44.integrations.Core.UploadFile;
+export const UploadFile = (...args) => base44.integrations.Core.UploadFile(...args);
 
-export const GenerateImage = base44.integrations.Core.GenerateImage;
+export const GenerateImage = (...args) => base44.integrations.Core.GenerateImage(...args);
 
-export const ExtractDataFromUploadedFile = base44.integrations.Core.ExtractDataFromUploadedFile;
+export const ExtractDataFromUploadedFile = (...args) => base44.integrations.Core.ExtractDataFromUploadedFile(...args);
 
-export const CreateFileSignedUrl = base44.integrations.Core.CreateFileSignedUrl;
+export const CreateFileSignedUrl = (...args) => base44.integrations.Core.CreateFileSignedUrl(...args);
 
-export const UploadPrivateFile = base44.integrations.Core.UploadPrivateFile;
-
-
-
+export const UploadPrivateFile = (...args) => base44.integrations.Core.UploadPrivateFile(...args);
 
 
 
