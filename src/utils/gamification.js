@@ -1,7 +1,7 @@
 import { base44 } from '@/api/base44Client';
 
-export const awardUserPoints = async (userEmail, pointsToAdd) => {
-    if (!userEmail) return;
+export const awardUserPoints = async (userId, pointsToAdd) => {
+    if (!userId) return;
 
     try {
         // 1. Get current user points

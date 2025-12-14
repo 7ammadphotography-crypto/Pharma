@@ -199,8 +199,8 @@ export default function Quiz() {
       totalReward += 100; // Perfect score bonus
     }
 
-    if (user?.email) {
-      await awardUserPoints(user.email, totalReward);
+    if (user?.id) {
+      await awardUserPoints(user.id, totalReward);
     }
 
     navigate(createPageUrl(`QuizResults?attemptId=${attempt.id}`));

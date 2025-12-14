@@ -336,12 +336,30 @@ export default function GroupChat() {
       isBanned
     });
 
-    if ((!message.trim() && uploadedFiles.length === 0) || !user) {
-      console.log('Send aborted: Empty message or no user');
+    // Verify auth immediately before sending
+    let currentUser;
+    try {
+      const { user: authUser } = await base44.auth.me().then(u => ({ user: u })).catch(() => ({ user: null }));
+      if (!authUser) {
+        // Fallback for dev/localhost if needed, or re-check local state but base44.auth.me is source of truth
+        // If base44.auth.me() fails, try to use the one from state IF it's valid
+        if (!user?.id) throw new Error("Not authenticated");
+        currentUser = user;
+      } else {
+        currentUser = authUser;
+      }
+    } catch (e) {
+      console.error("Auth check failed:", e);
+      toast.error('You must be logged in to send messages');
       return;
     }
 
-    if (isBanned) {
+    if ((!message.trim() && uploadedFiles.length === 0)) {
+      console.log('Send aborted: Empty message');
+      return;
+    }
+
+    if (currentUser.is_banned) {
       toast.error('You are banned from sending messages in this chat');
       return;
     }
@@ -360,9 +378,9 @@ export default function GroupChat() {
 
     const newMessage = {
       content: message,
-      user_id: user.id, // Legacy compatibility
-      user_name: user.full_name || user.email,
-      user_email: user.email,
+      user_id: currentUser.id, // Legacy compatibility
+      user_name: currentUser.full_name || currentUser.email,
+      user_email: currentUser.email,
       is_question: isQuestion,
       is_deleted: false,
       reply_to: replyingTo,
