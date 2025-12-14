@@ -48,7 +48,7 @@ const createSupabaseEntity = (entityName) => {
       return data;
     },
     // Filter with specific criteria
-    filter: async (criteria = {}) => {
+    filter: async (criteria = {}, sortColumn = null, limitCount = null) => {
       let query = supabase.from(tableName).select('*');
 
       Object.entries(criteria).forEach(([key, value]) => {
@@ -56,6 +56,16 @@ const createSupabaseEntity = (entityName) => {
           query = query.eq(key, value);
         }
       });
+
+      if (sortColumn) {
+        const ascending = !sortColumn.startsWith('-');
+        const column = ascending ? sortColumn : sortColumn.slice(1);
+        query = query.order(column, { ascending });
+      }
+
+      if (limitCount) {
+        query = query.limit(limitCount);
+      }
 
       const { data, error } = await query;
       if (error) {
