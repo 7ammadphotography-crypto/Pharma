@@ -80,7 +80,7 @@ export default function Quiz() {
 
   const { data: bookmarks = [] } = useQuery({
     queryKey: ['bookmarks', user?.email],
-    queryFn: () => base44.entities.BookmarkedQuestion.filter({ created_by: user?.email }),
+    queryFn: () => base44.entities.BookmarkedQuestion.filter({ user_id: user?.id }),
     enabled: !!user
   });
 

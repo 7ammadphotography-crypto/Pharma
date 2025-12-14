@@ -8,15 +8,15 @@ export default function StudentsList({ users, attempts, userPoints }) {
   const studentsWithStats = users
     .filter(u => u.role !== 'admin')
     .map(user => {
-      const userAttempts = attempts.filter(a => a.created_by === user.email && a.is_completed);
-      const points = userPoints.find(p => p.created_by === user.email);
-      
+      const userAttempts = attempts.filter(a => a.user_id === user.id && a.is_completed);
+      const points = userPoints.find(p => p.user_id === user.id);
+
       const totalQuizzes = userAttempts.length;
-      const avgScore = totalQuizzes > 0 
+      const avgScore = totalQuizzes > 0
         ? Math.round(userAttempts.reduce((sum, a) => sum + (a.percentage || 0), 0) / totalQuizzes)
         : 0;
       const totalTime = userAttempts.reduce((sum, a) => sum + (a.time_spent_seconds || 0), 0);
-      const lastActivity = userAttempts.length > 0 
+      const lastActivity = userAttempts.length > 0
         ? new Date(Math.max(...userAttempts.map(a => new Date(a.created_date))))
         : null;
 
@@ -56,12 +56,11 @@ export default function StudentsList({ users, attempts, userPoints }) {
           <Card key={student.id} className="glass-card border-0 p-3">
             <div className="flex items-center gap-3">
               {/* Rank */}
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
-                idx === 0 ? 'bg-amber-500 text-white' :
-                idx === 1 ? 'bg-slate-400 text-white' :
-                idx === 2 ? 'bg-amber-700 text-white' :
-                'bg-zinc-700 text-slate-400'
-              }`}>
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${idx === 0 ? 'bg-amber-500 text-white' :
+                  idx === 1 ? 'bg-slate-400 text-white' :
+                    idx === 2 ? 'bg-amber-700 text-white' :
+                      'bg-zinc-700 text-slate-400'
+                }`}>
                 {idx + 1}
               </div>
 

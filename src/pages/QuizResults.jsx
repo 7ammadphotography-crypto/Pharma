@@ -38,7 +38,7 @@ export default function QuizResults() {
 
   const { data: previousAttempts = [] } = useQuery({
     queryKey: ['previous-attempts', user?.email],
-    queryFn: () => base44.entities.QuizAttempt.filter({ created_by: user?.email, is_completed: true }, '-created_date', 10),
+    queryFn: () => base44.entities.QuizAttempt.filter({ user_id: user?.id, is_completed: true }, '-created_at', 10),
     enabled: !!user
   });
 

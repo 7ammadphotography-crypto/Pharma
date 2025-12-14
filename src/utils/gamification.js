@@ -5,7 +5,7 @@ export const awardUserPoints = async (userEmail, pointsToAdd) => {
 
     try {
         // 1. Get current user points
-        const userPointsList = await base44.entities.UserPoints.filter({ created_by: userEmail });
+        const userPointsList = await base44.entities.UserPoints.filter({ user_id: userId });
         let userPointRecord = userPointsList[0];
         let currentPoints = 0;
 
@@ -16,7 +16,7 @@ export const awardUserPoints = async (userEmail, pointsToAdd) => {
             });
         } else {
             userPointRecord = await base44.entities.UserPoints.create({
-                created_by: userEmail,
+                user_id: userId,
                 total_points: pointsToAdd
             });
             currentPoints = 0;

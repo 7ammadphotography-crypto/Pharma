@@ -26,7 +26,7 @@ export default function StudyPlan() {
 
   const { data: studyPlans = [], isLoading } = useQuery({
     queryKey: ['study-plans', user?.email],
-    queryFn: () => base44.entities.StudyPlan.filter({ created_by: user?.email, is_active: true }, '-created_date', 1),
+    queryFn: () => base44.entities.StudyPlan.filter({ user_id: user?.id, is_active: true }, '-created_at', 1),
     enabled: !!user
   });
 

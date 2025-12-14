@@ -152,6 +152,19 @@ const supabaseAdapter = {
       return { file_url: publicUrl };
     }
   },
+  // Mock integrations to prevent crashes in legacy code
+  integrations: {
+    Core: {
+      InvokeLLM: async () => ({ data: "AI features are currently disabled during migration." }),
+      UploadFile: async () => ({ file_url: "" }),
+      ExtractDataFromUploadedFile: async () => ({}),
+      list: async () => [],
+      ListRows: async () => ({ data: [] }),
+      CreateRow: async () => ({}),
+      UpdateRow: async () => ({}),
+      DeleteRow: async () => ({})
+    }
+  },
   entities: {}
 };
 

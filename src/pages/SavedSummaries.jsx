@@ -11,12 +11,12 @@ export default function SavedSummaries() {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    base44.auth.me().then(setUser).catch(() => {});
+    base44.auth.me().then(setUser).catch(() => { });
   }, []);
 
   const { data: summaries = [], isLoading } = useQuery({
     queryKey: ['summaries', user?.email],
-    queryFn: () => base44.entities.SavedSummary.filter({ created_by: user?.email }, '-created_date'),
+    queryFn: () => base44.entities.SavedSummary.filter({ user_id: user?.id }, '-created_at'),
     enabled: !!user
   });
 
