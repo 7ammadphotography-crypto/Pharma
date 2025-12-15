@@ -1,0 +1,7 @@
+{
+    "name": "base44-app",
+    "compatibility_date": "2025-12-15",
+    "assets": {
+        "directory": "./dist"
+    }
+}
