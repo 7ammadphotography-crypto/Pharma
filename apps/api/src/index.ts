@@ -5,16 +5,16 @@ const app = new Hono();
 
 // CORS Middleware
 app.use('/*', cors({
-    origin: ['https://tutssolution.com', 'https://www.tutssolution.com', 'http://localhost:5173', 'http://localhost:5174'],
+    origin: ['https://tutssolution.com', 'https://www.tutssolution.com'],
     allowHeaders: ['Content-Type', 'Authorization'],
-    allowMethods: ['POST', 'GET', 'OPTIONS'],
+    allowMethods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     exposeHeaders: ['Content-Length'],
     maxAge: 600,
     credentials: true,
 }));
 
 // Health Check
-app.get('/health', (c) => c.json({ status: 'ok', service: 'pharma-api' }));
+app.get('/health', (c) => c.json({ ok: true }));
 
 // Example API Endpoint
 app.get('/api/hello', (c) => {

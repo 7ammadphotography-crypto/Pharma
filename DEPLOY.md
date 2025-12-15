@@ -45,31 +45,33 @@ This repository is a monorepo containing:
 
 The frontend is a static site built with Vite. It should be deployed to **Cloudflare Pages**.
 
-### Steps
-1. **Build**:
-   ```bash
-   npm run build:web
-   ```
-   This produces a `apps/web/dist` directory.
+### Configuration Options
+You have two ways to configure the build in Cloudflare Pages:
 
-2. **Deploy**:
-   You can connect your GitHub repository to Cloudflare Pages.
-   - **Build Command**: `npm run build:web`
-   - **Build Output Directory**: `apps/web/dist`
-   - **Root Directory**: `/` (or leave empty if using root `package.json`).
+**Option A: Root-based (Recommended for Monorepos)**
+- **Root Directory**: `apps/web` (This ensures specific dependency handling)
+- **Build Command**: `npm run build`
+- **Build Output Directory**: `dist`
 
-   *Alternatively, deploy manually:*
-   ```bash
-   cd apps/web
-   npm run build
-   npx wrangler pages deploy dist --project-name=pharma-web
-   ```
+**Option B: Repo-root based**
+- **Root Directory**: `/` (Empty)
+- **Build Command**: `npm run build:web`
+- **Build Output Directory**: `apps/web/dist`
 
-### Environment Variables
+### Environment Variables (Pages)
 Set these in your Cloudflare Pages dashboard (Settings > Environment Variables):
 
 - `VITE_SUPABASE_URL`: Your Supabase URL.
 - `VITE_SUPABASE_ANON_KEY`: Your Supabase Anon Key.
+- `VITE_API_BASE_URL`: `https://api.tutssolution.com` (or your worker URL).
+
+### Supabase Auth Configuration
+In your Supabase Dashboard (Authentication > URL Configuration):
+- **Site URL**: `https://tutssolution.com`
+- **Redirect URLs**:
+  - `https://tutssolution.com/*`
+  - `https://www.tutssolution.com/*`
+  - `http://localhost:5173/*` (for local dev)
 
 ---
 
@@ -82,23 +84,21 @@ The backend is a Cloudflare Worker using Hono.
    ```bash
    npm run deploy:api
    ```
-   This runs `wrangler deploy` in the `apps/api` directory.
 
-2. **Custom Domain**:
-   Update `apps/api/wrangler.toml` (or use Cloudflare Dashboard) to route `api.tutssolution.com` to this worker.
+2. **Secrets**:
+   Run these commands locally to set production secrets:
+   ```bash
+   npx wrangler secret put SUPABASE_URL --name pharma-api
+   npx wrangler secret put SUPABASE_SERVICE_ROLE_KEY --name pharma-api
+   ```
 
-   Example `wrangler.toml` addition:
+3. **Custom Domain**:
+   To route `api.tutssolution.com` to your worker, add this to `apps/api/wrangler.toml`:
    ```toml
    routes = [
      { pattern = "api.tutssolution.com/*", zone_name = "tutssolution.com" }
    ]
    ```
-
-### Environment Variables
-Set these in `apps/api/.dev.vars` (local) or via `wrangler secret put` (production):
-
-- `SUPABASE_URL`: Your Supabase URL.
-- `SUPABASE_SERVICE_ROLE_KEY`: Your Supabase Service Role Key (Keep Secret!).
 
 ---
 
