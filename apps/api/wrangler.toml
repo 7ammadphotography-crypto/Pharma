@@ -1,6 +1,6 @@
-name = "pharma-api"
+name = "pharma1"
 main = "src/index.ts"
-compatibility_date = "2025-02-14"
+compatibility_date = "2025-12-15"
 
 [observability]
 enabled = true
